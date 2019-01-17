@@ -11,4 +11,4 @@ class Measurement:
         self.err = self.dist * 0.01
 
     def __str__(self):
-        return str(self.node1) + " -> " + str(self.node2) + ": " + str(self.dist) + " ± " + str(self.err)
+        return '{:12s} ->  {:12s}: {:.3f} ± {:.3f}'.format(str(self.node1), str(self.node2), self.dist, self.err)

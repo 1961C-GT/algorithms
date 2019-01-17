@@ -16,7 +16,7 @@ print("Algorithm: " + sys.argv[3])
 #
 
 alg_name = sys.argv[3]
-alg_module = importlib.import_module('algorithms.' + alg_name + '.' + alg_name)
+alg_module = importlib.import_module('Algorithms.' + alg_name + '.' + alg_name)
 algorithm = getattr(alg_module, alg_name)
 
 #
