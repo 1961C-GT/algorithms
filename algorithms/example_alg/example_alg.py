@@ -2,6 +2,7 @@ from Algorithms.algorithm import Algorithm
 
 # > python3 main.py node_defs.csv raw_data.csv example_alg
 
+
 class example_alg(Algorithm):
     def __init__(self, node_arr):
         super().__init__(node_arr)

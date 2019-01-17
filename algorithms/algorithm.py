@@ -1,10 +1,13 @@
 import time
 import builtins as __builtin__
+
+
 class Algorithm:
 
     time_only = True
 
     old_print = print
+
     def __init__(self, node_arr):
         self.node_arr = node_arr
         self.start = 0
@@ -27,7 +30,8 @@ class Algorithm:
     def _process(self, callback, canvas):
         global print
         self._callback = callback
-        print('\n##########################################################################')
+        print(
+            '\n##########################################################################')
         print(f'Start Algorithm Process [{self.__class__.__name__}]')
         print('##########################################################################')
         __class__.__cname__ = self.__class__.__name__
@@ -41,7 +45,8 @@ class Algorithm:
         global print
         self.end = time.time()
         __builtin__.print = self.__class__.old_print
-        print('##########################################################################\n')
+        print(
+            '##########################################################################\n')
         print("Algorithm time: %.2fus" % ((self.end - self.start)*1000000))
         self._callback(self.node_arr)
 

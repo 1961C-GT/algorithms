@@ -2,17 +2,18 @@ import uuid
 import random
 from measurement import Measurement
 
+
 class Node:
     def __init__(self, id=None, name=None, isBase=False, x=-1, y=-1):
         if id is None:
             id = uuid.uuid4()
         if name is None:
             name = ""
-        self.id = id;
+        self.id = id
         self.name = name
         self.isBase = isBase
-        self.x = x #random.randint(25, 600)
-        self.y = y #random.randint(25, 600)
+        self.x = x  # random.randint(25, 600)
+        self.y = y  # random.randint(25, 600)
         self.measurements = []
 
     def add_measurement(self, nodeB, dist):
