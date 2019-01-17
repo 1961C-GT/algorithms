@@ -2,7 +2,7 @@ import sys
 import importlib
 import tkinter as tk
 from node import Node
-from measure import Measurement
+from measurement import Measurement
 
 print("Simulation Start: " + sys.argv[1])
 

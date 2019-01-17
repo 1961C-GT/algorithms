@@ -1,6 +1,6 @@
 import uuid
 import random
-from measure import Measurement
+from measurement import Measurement
 
 class Node:
     def __init__(self, id=None, name=None, isBase=False, x=0, y=0):
