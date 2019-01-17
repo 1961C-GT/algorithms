@@ -6,7 +6,7 @@ from measure import Measurement
 
 print("Simulation Start: " + sys.argv[1])
 
-module = importlib.import_module('Algorithms.' + sys.argv[1] + '.' + sys.argv[1])
+module = importlib.import_module('algorithms.' + sys.argv[1] + '.' + sys.argv[1])
 
 root = tk.Tk()
 canvas = tk.Canvas(root, width=650, height=650, borderwidth=0, highlightthickness=0, bg="black")
@@ -18,8 +18,8 @@ tk.Canvas.create_circle = _create_circle
 # Simulation Code Init ############
 
 node_arr = {
-    'A1': Node('A1', base=True),
-    'A2': Node('A2', base=True),
+    'A1': Node('A1', isBase=True),
+    'A2': Node('A2', isBase=True),
     'B': Node('B'),
     'C1': Node('C1'),
     'C2': Node('C2'),
