@@ -1,6 +1,6 @@
 ﻿NodeID,Name,Is Base?,X coordinate,Y coordinate
-A1,Base,1,0,0
-A2,Xtender,1,10,0
+A1,BaseST,1,0,0
+A2,Xtendr,1,10,0
 B,RC Boat,0,-1,-1
 C1,Boat 1,0,-1,-1
 C2,Boat 2,0,-1,-1

@@ -3,7 +3,7 @@ import random
 from measurement import Measurement
 
 class Node:
-    def __init__(self, id=None, name=None, isBase=False, x=0, y=0):
+    def __init__(self, id=None, name=None, isBase=False, x=-1, y=-1):
         if id is None:
             id = uuid.uuid4()
         if name is None:
