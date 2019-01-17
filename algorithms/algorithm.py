@@ -2,8 +2,9 @@ import time
 import builtins as __builtin__
 class Algorithm:
 
-    old_print = print
+    time_only = True
 
+    old_print = print
     def __init__(self, node_arr):
         self.node_arr = node_arr
         self.start = 0
@@ -17,14 +18,17 @@ class Algorithm:
         # Instead consider testing if custom argument keywords
         # are present in kwargs
         t = '{0:.2f}'.format((time.time() - __class__.__stime__)*1000000)
-        __class__.old_print('{:30s}'.format(f'[{__class__.__cname__} | {t}us] '), end='')
+        if __class__.time_only is True:
+            __class__.old_print('{:14s}'.format(f'[{t}us] '), end='')
+        else:
+            __class__.old_print('{:30s}'.format(f'[{__class__.__cname__} | {t}us] '), end='')
         return __class__.old_print(*args, **kwargs)
 
     def _process(self, callback):
         global print
         self._callback = callback
-        print('##########################################################################')
-        print('Start Algorithm Process')
+        print('\n##########################################################################')
+        print(f'Start Algorithm Process [{self.__class__.__name__}]')
         print('##########################################################################')
         __class__.__cname__ = self.__class__.__name__
         old_print = __builtin__.print
@@ -37,7 +41,7 @@ class Algorithm:
         global print
         self.end = time.time()
         __builtin__.print = self.__class__.old_print
-        print('##########################################################################')
+        print('##########################################################################\n')
         print("Algorithm time: %.2fus" % ((self.end - self.start)*1000000))
         self._callback(self.node_arr)
 
