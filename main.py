@@ -65,4 +65,4 @@ def render(nodes):
     root.wm_title("Circles and Arcs")
     root.mainloop()
 
-algorithm(nodes)._process(render)
+algorithm(nodes)._process(render, canvas)

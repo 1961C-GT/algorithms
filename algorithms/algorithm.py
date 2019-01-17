@@ -24,7 +24,7 @@ class Algorithm:
             __class__.old_print('{:30s}'.format(f'[{__class__.__cname__} | {t}us] '), end='')
         return __class__.old_print(*args, **kwargs)
 
-    def _process(self, callback):
+    def _process(self, callback, canvas):
         global print
         self._callback = callback
         print('\n##########################################################################')
@@ -35,7 +35,7 @@ class Algorithm:
         __builtin__.print = self.__class__.class_print
         self.start = time.time()
         __class__.__stime__ = self.start
-        self.process(self._run_callback)
+        self.process(self._run_callback, canvas)
 
     def _run_callback(self):
         global print
