@@ -3,14 +3,17 @@ import random
 from measure import Measurement
 
 class Node:
-    def __init__(self, id=None, base=False):
+    def __init__(self, id=None, name=None, base=False, x=0, y=0):
         if id is None:
             id = uuid.uuid4()
+        if name is None:
+            name = ""
         self.id = id;
         self.measurements = []
         self.base = base
-        self.x = 0 #random.randint(25, 600)
-        self.y = 0 #random.randint(25, 600)
+        self.x = x #random.randint(25, 600)
+        self.y = y #random.randint(25, 600)
+        self.name = name
 
     def addMeasurement(self, nodeb, dist):
         self.measurements.append(Measurement(self, nodeb, dist))
@@ -37,7 +40,7 @@ class Node:
         self.measurements = []
 
     def __str__(self):
-        if self.base:
-            return 'Base: ' + str(self.id)
+        if self.name != "":
+            return str(self.name) + ":" + str(self.id)
         else:
-            return 'Node: ' + str(self.id)
+            return str(self.id)

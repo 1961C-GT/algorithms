@@ -6,7 +6,7 @@ from measure import Measurement
 
 print("Simulation Start: " + sys.argv[1])
 
-module = importlib.import_module(sys.argv[1])
+module = importlib.import_module('Algorithms.' + sys.argv[1] + '.' + sys.argv[1])
 
 root = tk.Tk()
 canvas = tk.Canvas(root, width=650, height=650, borderwidth=0, highlightthickness=0, bg="black")
@@ -79,20 +79,14 @@ node_arr['C6'].addMeasurement(node_arr['C7'], 10.9375)
 
 # Simulation Code Calc ############
 
-# node_arr[0].getMeasurements()
-# node_arr[0].setPosition(0, 0)
 
 class_ = getattr(module, sys.argv[1])
 instance = class_(node_arr)
 
-instance.process()
+def render(node_arr):
+    for key,node in node_arr.items():
+        node.show(canvas)
+    root.wm_title("Circles and Arcs")
+    root.mainloop()
 
-node_arr = instance.getNodeArray()
-
-
-# #################################
-
-for key,node in node_arr.items():
-    node.show(canvas)
-root.wm_title("Circles and Arcs")
-root.mainloop()
+instance._process(render)
