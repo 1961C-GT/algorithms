@@ -1,6 +1,6 @@
 from algorithms.algorithm import Algorithm
 
-# > python3 main.py points.csv example_alg
+# > python3 main.py node_defs.csv raw_data.csv example_alg
 
 class example_alg(Algorithm):
     def __init__(self, node_arr):
