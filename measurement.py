@@ -5,9 +5,9 @@ class Measurement:
         self.dist = dist
         self.err = err
         if self.err == 0:
-            self.calcError()
+            self.calc_error()
 
-    def calcError(self):
+    def calc_error(self):
         self.err = self.dist * 0.01
 
     def __str__(self):

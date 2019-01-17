@@ -8,8 +8,8 @@ class example_alg(Algorithm):
 
     def process(self, callback):
         for key,node in self.node_arr.items():
-            for m in node.getMeasurements():
+            for m in node.get_measurements():
                 print(m)
-        self.node_arr['A1'].setPosition(50, 50)
+        self.node_arr['A1'].set_position(50, 50)
 
         callback()

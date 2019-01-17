@@ -15,14 +15,14 @@ class Node:
         self.y = y #random.randint(25, 600)
         self.measurements = []
 
-    def addMeasurement(self, nodeB, dist):
+    def add_measurement(self, nodeB, dist):
         self.measurements.append(Measurement(self, nodeB, dist))
 
-    def setPosition(self, x, y):
+    def set_position(self, x, y):
         self.x = x
         self.y = y
 
-    def getPosition(self):
+    def get_position(self):
         return (self.x, self.y)
 
     def show(self, canvas):
@@ -33,10 +33,10 @@ class Node:
             size = 10
         canvas.create_circle(self.x, self.y, size, fill=fill)
 
-    def getMeasurements(self):
+    def get_measurements(self):
         return self.measurements
 
-    def clearMeasurements(self):
+    def clear_measurements(self):
         self.measurements = []
 
     def __str__(self):

@@ -53,7 +53,7 @@ with open(sys.argv[2], 'r') as data_file:
     data_file.readline()
     measurements = csv.reader(data_file)
     for m in measurements:
-        nodes[m[0]].addMeasurement(nodes[m[1]], float(m[2]))
+        nodes[m[0]].add_measurement(nodes[m[1]], float(m[2]))
 
 #
 # Simulate!
