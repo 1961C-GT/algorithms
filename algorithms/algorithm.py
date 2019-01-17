@@ -1,5 +1,7 @@
 import time
 import builtins as __builtin__
+
+
 class Algorithm:
 
     time_only = True
