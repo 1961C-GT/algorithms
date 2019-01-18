@@ -12,6 +12,7 @@ from measurement import Measurement
 
 width = 700
 height = 700
+move_amt = 20
 
 print("Data File: " + sys.argv[1])
 print("Algorithm: " + sys.argv[2])
@@ -30,7 +31,6 @@ algorithm = getattr(alg_module, alg_name)
 # Set up graphics
 #
 
-
 root = tk.Tk()
 root.resizable(width=False, height=False)
 canvas = tk.Canvas(root, width=width, height=height, borderwidth=0,
@@ -47,16 +47,17 @@ root.config(menu=menubar)
 
 # Configure measure utilitity
 # Include globals (for event data transfer)
-global measuring, start_pos
+global measuring, start_pos, universal_scale
 # Init globals
 start_pos = []
 measuring = False
+universal_scale = 1
 # Measure function
 
 
 def measure(event):
     # Include globals
-    global measuring, start_pos, cur_line, cur_line_txt
+    global measuring, start_pos, cur_line, cur_line_txt, universal_scale
     # Check to see if we are measuring
     if measuring == True:
         # Try to remove the old elements
@@ -76,9 +77,11 @@ def measure(event):
         # Calculate mid point + rotation offset
         midx = (start_pos[0] + event.x)/2 - math.sin(rrotation)*10
         midy = (start_pos[1] + event.y)/2 - math.cos(rrotation)*10
+        # Calculate distance
+        dist_num = math.sqrt(
+            (start_pos[0] - event.x)**2 + (start_pos[1] - event.y)**2) / universal_scale
         # Calculate distance string
-        dist = '{:.0f}ft'\
-            .format(math.sqrt((start_pos[0] - event.x)**2 + (start_pos[1] - event.y)**2))
+        dist = '{:.0f}ft'.format(dist_num)
         # Create the text
         cur_line_txt = event.widget.create_text(midx, midy, text=dist,
                                                 fill="white", font=font.Font(family='Courier New', size=14),
@@ -86,6 +89,29 @@ def measure(event):
         # Create the line
         cur_line = event.widget.create_line(start_pos[0], start_pos[1], event.x,
                                             event.y, fill="#3c4048", dash=(3, 5), arrow=tk.BOTH)
+
+
+def shrink(scale):
+    global universal_scale
+    objs = canvas.find_all()
+    for obj in objs:
+        if canvas.type(obj) == "text":
+            continue
+        x = root.winfo_pointerx()
+        y = root.winfo_pointery()
+        abs_coord_x = root.winfo_pointerx() - root.winfo_rootx()
+        abs_coord_y = root.winfo_pointery() - root.winfo_rooty()
+        canvas.scale(obj, abs_coord_x, abs_coord_y, scale, scale)
+    universal_scale *= scale
+
+
+def move(x, y):
+    objs = canvas.find_all()
+    for obj in objs:
+        if canvas.type(obj) == "text":
+            continue
+        canvas.move(obj, x, y)
+
 # Function that enables the measuring and saved the initial point
 
 
@@ -98,11 +124,18 @@ def start_measure(event):
     measuring = True
 
 
+def zoom_in(event):
+    shrink(0.9)
+
+
 def stop_measure(event):
     # Include globals
-    global measuring, cur_line, cur_line_txt
+    global measuring, cur_line, cur_line_txt, start_pos
     # Set measuring to False
     measuring = False
+    now_pos = (event.x, event.y)
+    if start_pos[0] == now_pos[0] and start_pos[1] == now_pos[1]:
+        shrink(1.1)
     # Try to remove the old elements
     try:
         event.widget.delete(cur_line)
@@ -114,11 +147,17 @@ def stop_measure(event):
 # Bind these functions to motion, press, and release
 canvas.bind('<Motion>', measure)
 canvas.bind('<Button-1>', start_measure)
+canvas.bind('<Button-3>', zoom_in)
+canvas.bind('<Button-2>', zoom_in)
+root.bind('<Up>', lambda e: move(0, -move_amt))
+root.bind('<Down>', lambda e: move(0, move_amt))
+root.bind('<Left>', lambda e: move(-move_amt, 0))
+root.bind('<Right>', lambda e: move(move_amt, 0))
 canvas.bind('<ButtonRelease-1>', stop_measure)
 
 # Init the text field at the bottom of the simulator
-T = Text(root, height=2, font=font.Font(family='Courier New', size=14))
-T.grid(column=0, row=1)
+# T = Text(root, height=2, font = font.Font(family='Courier New', size=14))
+# T.grid(column=0,row=1)
 
 # Include a new create_circle method
 
@@ -178,7 +217,10 @@ def render(nodes, time_taken, note):
     l1 = "Algorithm      : {:17s} || # Elements : {:20s}".format(
         sys.argv[2], str(len(nodes)))
     l2 = "Execution Time : {:17s} || # Note     : {:20s}".format(t, note)
-    T.insert(END, f"{l1}\n{l2}\n")
+    # T.insert(END, f"{l1}\n{l2}\n")
+    canvas.create_text(width/2-50, height - 20, text=f"{l1}\n{l2}\n", fill="white", font=font.Font(family='Courier New', size=14),
+                       justify=tk.RIGHT)
+
     root.mainloop()
 
 
