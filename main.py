@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import sys
 import importlib
 import math
@@ -16,8 +18,16 @@ area_width = 2000
 area_height = 2000
 move_amt = 20
 
-print("Node Defs: " + sys.argv[1])
-print("Algorithm: " + sys.argv[2])
+if len(sys.argv) < 3:
+    print("Using default data files...")
+    dat_file = "random"
+    alg_name = "drct_trng"
+else:
+    dat_file = sys.argv[1]
+    alg_name = sys.argv[2]
+
+print("Data File: " + dat_file)
+print("Algorithm: " + alg_name)
 
 # python3 main.py random example_alg
 
@@ -25,7 +35,6 @@ print("Algorithm: " + sys.argv[2])
 # Import algorithm
 #
 
-alg_name = sys.argv[2]
 alg_module = importlib.import_module('algorithms.' + alg_name + '.' + alg_name)
 algorithm = getattr(alg_module, alg_name)
 
@@ -37,7 +46,7 @@ root = tk.Tk()
 root.resizable(width=False, height=False)
 canvas = tk.Canvas(root, width=width, height=height, borderwidth=0,
                    highlightthickness=0, bg="#22252b")
-canvas.grid(column=0,row=0, columnspan=30)
+canvas.grid(column=0, row=0, columnspan=30)
 # Add menu
 menubar = Menu(root)
 filemenu = Menu(menubar, tearoff=0)
@@ -55,6 +64,8 @@ start_pos = []
 measuring = False
 universal_scale = 1
 # Measure function
+
+
 def measure(event):
     # Include globals
     global measuring, start_pos, cur_line, cur_line_txt, universal_scale
@@ -68,7 +79,7 @@ def measure(event):
             pass
         # Calculate the rotation between the two points
         rotation = 180 - math.degrees(math.atan2(start_pos[1] - event.y,
-            start_pos[0] - event.x));
+                                                 start_pos[0] - event.x))
         # Normalize the rotation
         if rotation > 90 and rotation < 270:
             rotation -= 180
@@ -78,16 +89,18 @@ def measure(event):
         midx = (start_pos[0] + event.x)/2 - math.sin(rrotation)*10
         midy = (start_pos[1] + event.y)/2 - math.cos(rrotation)*10
         # Calculate distance
-        dist_num = math.sqrt((start_pos[0] - event.x)**2 + (start_pos[1] - event.y)**2) / universal_scale
+        dist_num = math.sqrt(
+            (start_pos[0] - event.x)**2 + (start_pos[1] - event.y)**2) / universal_scale
         # Calculate distance string
         dist = '{:.0f}ft'.format(dist_num)
         # Create the text
         cur_line_txt = event.widget.create_text(midx, midy, text=dist,
-            fill="white", font=font.Font(family='Courier New', size=14),
-            justify=tk.LEFT,angle=rotation)
+                                                fill="white", font=font.Font(family='Courier New', size=14),
+                                                justify=tk.LEFT, angle=rotation)
         # Create the line
         cur_line = event.widget.create_line(start_pos[0], start_pos[1], event.x,
-            event.y, fill="#3c4048", dash=(3,5), arrow=tk.BOTH)
+                                            event.y, fill="#3c4048", dash=(3, 5), arrow=tk.BOTH)
+
 
 def shrink(scale, x=None, y=None):
     global universal_scale
@@ -95,20 +108,31 @@ def shrink(scale, x=None, y=None):
     for obj in objs:
         if canvas.type(obj) == "text" and not 'scale' in canvas.gettags(obj):
             continue
+<<<<<<< HEAD
         if x is None or y is None:
             x = root.winfo_pointerx() - root.winfo_rootx()
             y = root.winfo_pointery() - root.winfo_rooty()
         canvas.scale(obj,x,y,scale,scale)
+=======
+        x = root.winfo_pointerx()
+        y = root.winfo_pointery()
+        abs_coord_x = root.winfo_pointerx() - root.winfo_rootx()
+        abs_coord_y = root.winfo_pointery() - root.winfo_rooty()
+        canvas.scale(obj, abs_coord_x, abs_coord_y, scale, scale)
+>>>>>>> d567d2d072727ea4852d6a8bbd6d1f0320df04bf
     universal_scale *= scale
+
 
 def move(x, y):
     objs = canvas.find_all()
     for obj in objs:
         if canvas.type(obj) == "text" and not 'scale' in canvas.gettags(obj):
             continue
-        canvas.move(obj,x, y)
+        canvas.move(obj, x, y)
 
 # Function that enables the measuring and saved the initial point
+
+
 def start_measure(event):
     # Include globals
     global measuring, start_pos, cur_line
@@ -117,11 +141,18 @@ def start_measure(event):
     # Set measuring to True
     measuring = True
 
+<<<<<<< HEAD
 def zoom(scale, center=False):
     if center is False:
         shrink(scale)
     else:
         shrink(scale, x=0, y=0)
+=======
+
+def zoom_in(event):
+    shrink(0.9)
+>>>>>>> d567d2d072727ea4852d6a8bbd6d1f0320df04bf
+
 
 def stop_measure(event):
     # Include globals
@@ -138,15 +169,25 @@ def stop_measure(event):
     except:
         pass
 
+
 # Bind these functions to motion, press, and release
 canvas.bind('<Motion>', measure)
 canvas.bind('<Button-1>', start_measure)
+<<<<<<< HEAD
 canvas.bind('<Button-3>', lambda e: zoom(0.9))
 canvas.bind('<Button-2>', lambda e: zoom(0.9))
 root.bind('<Up>', lambda e: move(0,move_amt))
 root.bind('<Down>', lambda e: move(0,-move_amt))
 root.bind('<Left>', lambda e: move(move_amt,0))
 root.bind('<Right>', lambda e: move(-move_amt,0))
+=======
+canvas.bind('<Button-3>', zoom_in)
+canvas.bind('<Button-2>', zoom_in)
+root.bind('<Up>', lambda e: move(0, -move_amt))
+root.bind('<Down>', lambda e: move(0, move_amt))
+root.bind('<Left>', lambda e: move(-move_amt, 0))
+root.bind('<Right>', lambda e: move(move_amt, 0))
+>>>>>>> d567d2d072727ea4852d6a8bbd6d1f0320df04bf
 canvas.bind('<ButtonRelease-1>', stop_measure)
 
 # Init the text field at the bottom of the simulator
@@ -154,8 +195,12 @@ canvas.bind('<ButtonRelease-1>', stop_measure)
 # T.grid(column=0,row=1)
 
 # Include a new create_circle method
+
+
 def _create_circle(self, x, y, r, **kwargs):
-    return self.create_oval(x-r, y-r, x+r, y+r, **kwargs)
+    return self.create_oval(10*x-r, 10*y-r, 10*x+r, 10*y+r, **kwargs)
+
+
 tk.Canvas.create_circle = _create_circle
 
 def _connect_nodes(self, node1_pos, node2_pos, text=None, dashed=True, color="#3c4048"):
@@ -227,7 +272,7 @@ tk.Canvas.circle_node_guess = _circle_node_guess
 
 nodes = {}
 
-with open('./datasets/' + sys.argv[1]+'.def', 'r') as defs_file:
+with open('./datasets/' + dat_file + '.def', 'r') as defs_file:
     defs_file.readline()
     node_defs = csv.reader(defs_file)
     for node in node_defs:
@@ -235,13 +280,14 @@ with open('./datasets/' + sys.argv[1]+'.def', 'r') as defs_file:
             nodes[node[0]] = Node(node[0], node[1], True,
                                   float(node[3]), float(node[4]))
         else:
-            nodes[node[0]] = Node(node[0], node[1], False, float(node[3]), float(node[4]))
+            nodes[node[0]] = Node(node[0], node[1], False,
+                                  float(node[3]), float(node[4]))
 
 #
 # Import measurements
 #
 
-with open('./datasets/' + sys.argv[1]+'.dat', 'r') as data_file:
+with open('./datasets/' + dat_file + '.dat', 'r') as data_file:
     data_file.readline()
     measurements = csv.reader(data_file)
     for m in measurements:
@@ -264,14 +310,22 @@ def render(nodes, time_taken, note):
     for key, node in nodes.items():
         node.show_real(canvas)
         node.show(canvas)
-    root.wm_title(f"Algorithm Result [{sys.argv[2]}]")
+    root.wm_title(f"Algorithm Result [{alg_name}]")
     t = "%.2fms" % (time_taken*1000)
-    l1 = "Algorithm      : {:17s} || # Elements : {:20s}".format(sys.argv[2], str(len(nodes)))
+    l1 = "Algorithm      : {:17s} || # Elements : {:20s}".format(
+        alg_name, str(len(nodes)))
     l2 = "Execution Time : {:17s} || # Note     : {:20s}".format(t, note)
     # T.insert(END, f"{l1}\n{l2}\n")
+<<<<<<< HEAD
     canvas.create_text(width/2-50, height - 20, text=f"{l1}\n{l2}\n",fill="white", font=font.Font(family='Courier New', size=14),
         justify=tk.RIGHT)
     shrink(0.35, x=0, y=0)
+=======
+    canvas.create_text(width/2-50, height - 20, text=f"{l1}\n{l2}\n", fill="white", font=font.Font(family='Courier New', size=14),
+                       justify=tk.RIGHT)
+
+>>>>>>> d567d2d072727ea4852d6a8bbd6d1f0320df04bf
     root.mainloop()
+
 
 algorithm(nodes)._process(render, canvas)

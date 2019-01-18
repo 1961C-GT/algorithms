@@ -8,8 +8,8 @@ class Algorithm:
 
     old_print = print
 
-    def __init__(self, node_arr):
-        self.node_arr = node_arr
+    def __init__(self, nodes):
+        self.nodes = nodes
         self.start = 0
         self.end = 0
         self.note = 'None'
@@ -49,7 +49,7 @@ class Algorithm:
         print(
             '##########################################################################\n')
         print("Algorithm time: %.2fms" % ((self.end - self.start)*1000))
-        self._callback(self.node_arr, self.end-self.start, self.note)
+        self._callback(self.nodes, self.end - self.start, self.note)
 
     def process(self, callback):
         pass
