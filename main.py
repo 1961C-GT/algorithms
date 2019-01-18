@@ -12,6 +12,8 @@ from measurement import Measurement
 
 width = 700
 height = 700
+area_width = 2000
+area_height = 2000
 move_amt = 20
 
 print("Node Defs: " + sys.argv[1])
@@ -87,23 +89,22 @@ def measure(event):
         cur_line = event.widget.create_line(start_pos[0], start_pos[1], event.x,
             event.y, fill="#3c4048", dash=(3,5), arrow=tk.BOTH)
 
-def shrink(scale):
+def shrink(scale, x=None, y=None):
     global universal_scale
     objs = canvas.find_all()
     for obj in objs:
-        if canvas.type(obj) == "text":
+        if canvas.type(obj) == "text" and not 'scale' in canvas.gettags(obj):
             continue
-        x = root.winfo_pointerx()
-        y = root.winfo_pointery()
-        abs_coord_x = root.winfo_pointerx() - root.winfo_rootx()
-        abs_coord_y = root.winfo_pointery() - root.winfo_rooty()
-        canvas.scale(obj,abs_coord_x,abs_coord_y,scale,scale)
+        if x is None or y is None:
+            x = root.winfo_pointerx() - root.winfo_rootx()
+            y = root.winfo_pointery() - root.winfo_rooty()
+        canvas.scale(obj,x,y,scale,scale)
     universal_scale *= scale
 
 def move(x, y):
     objs = canvas.find_all()
     for obj in objs:
-        if canvas.type(obj) == "text":
+        if canvas.type(obj) == "text" and not 'scale' in canvas.gettags(obj):
             continue
         canvas.move(obj,x, y)
 
@@ -116,8 +117,11 @@ def start_measure(event):
     # Set measuring to True
     measuring = True
 
-def zoom_in(event):
-    shrink(0.9)
+def zoom(scale, center=False):
+    if center is False:
+        shrink(scale)
+    else:
+        shrink(scale, x=0, y=0)
 
 def stop_measure(event):
     # Include globals
@@ -126,7 +130,7 @@ def stop_measure(event):
     measuring = False
     now_pos = (event.x, event.y)
     if start_pos[0] == now_pos[0] and start_pos[1] == now_pos[1]:
-        shrink(1.1)
+        zoom(1.1)
     # Try to remove the old elements
     try:
         event.widget.delete(cur_line)
@@ -137,12 +141,12 @@ def stop_measure(event):
 # Bind these functions to motion, press, and release
 canvas.bind('<Motion>', measure)
 canvas.bind('<Button-1>', start_measure)
-canvas.bind('<Button-3>', zoom_in)
-canvas.bind('<Button-2>', zoom_in)
-root.bind('<Up>', lambda e: move(0,-move_amt))
-root.bind('<Down>', lambda e: move(0,move_amt))
-root.bind('<Left>', lambda e: move(-move_amt,0))
-root.bind('<Right>', lambda e: move(move_amt,0))
+canvas.bind('<Button-3>', lambda e: zoom(0.9))
+canvas.bind('<Button-2>', lambda e: zoom(0.9))
+root.bind('<Up>', lambda e: move(0,move_amt))
+root.bind('<Down>', lambda e: move(0,-move_amt))
+root.bind('<Left>', lambda e: move(move_amt,0))
+root.bind('<Right>', lambda e: move(-move_amt,0))
 canvas.bind('<ButtonRelease-1>', stop_measure)
 
 # Init the text field at the bottom of the simulator
@@ -153,6 +157,69 @@ canvas.bind('<ButtonRelease-1>', stop_measure)
 def _create_circle(self, x, y, r, **kwargs):
     return self.create_oval(x-r, y-r, x+r, y+r, **kwargs)
 tk.Canvas.create_circle = _create_circle
+
+def _connect_nodes(self, node1_pos, node2_pos, text=None, dashed=True, color="#3c4048"):
+    if node2_pos[0] is None or node2_pos[1] is None or node1_pos[0] is None or node1_pos[1] is None:
+        return
+    if text is not None:
+        # Calculate the rotation between the two points
+        rotation = 180 - math.degrees(math.atan2(node1_pos[1] - node2_pos[1],
+            node1_pos[0] - node2_pos[0]));
+        # node1_pos the rotation
+        if rotation > 90 and rotation < 270:
+            rotation -= 180
+        # Convert to radians
+        rrotation = math.radians(rotation)
+        # Calculate mid point + rotation offset
+        midx = (node1_pos[0] + node2_pos[0])/2 - math.sin(rrotation)*10
+        midy = (node1_pos[1] + node2_pos[1])/2 - math.cos(rrotation)*10
+        self.create_text(midx, midy, text=text,
+            fill="white", font=font.Font(family='Courier New', size=14),
+            justify=tk.LEFT,angle=rotation,tag='scale')
+    if dashed is True:
+        self.create_line(node1_pos[0], node1_pos[1], node2_pos[0], node2_pos[1], fill=color, dash=(3,5))
+    else:
+        self.create_line(node1_pos[0], node1_pos[1], node2_pos[0], node2_pos[1], fill=color)
+tk.Canvas.connect_nodes = _connect_nodes
+
+def _connect_nodes_real(self, node1, node2, text=None, dashed=True, color="#3c4048"):
+    node1_pos = node1.get_real_position()
+    node2_pos = node2.get_real_position()
+    self.connect_nodes(node1_pos, node2_pos, text=text, dashed=dashed, color=color)
+tk.Canvas.connect_nodes_real = _connect_nodes_real
+
+def _connect_nodes_guess(self, node1, node2, text=None, dashed=True, color="#3c4048"):
+    node1_pos = node1.get_position()
+    node2_pos = node2.get_position()
+    self.connect_nodes(node1_pos, node2_pos, text=text, dashed=dashed, color=color)
+tk.Canvas.connect_nodes_guess = _connect_nodes_guess
+
+def _circle_node(self, node_pos, radius, text, dashed, fill, outline):
+    if node_pos[0] is None or node_pos[1] is None:
+        return
+    if text is not None:
+        ypos = node_pos[1]-radius-20
+        print(ypos)
+        if ypos < 0:
+            ypos = node_pos[1]+radius+20
+        self.create_text(node_pos[0],ypos,text=text,
+            fill="white", font=font.Font(family='Courier New', size=14),
+            justify=tk.LEFT,tag='scale')
+    if dashed is True:
+        self.create_circle(node_pos[0], node_pos[1], radius, fill=fill, outline=outline,tags=['scale'],dash=(3,5))
+    else:
+        self.create_circle(node_pos[0], node_pos[1], radius, fill=fill, outline=outline,tags=['scale'])
+tk.Canvas.circle_node = _circle_node
+
+def _circle_node_real(self, node, radius, text=None, dashed=True, fill="", outline="red"):
+    node_pos = node.get_real_position()
+    self.circle_node(node_pos, radius, text, dashed, fill, outline)
+tk.Canvas.circle_node_real = _circle_node_real
+
+def _circle_node_guess(self, node, radius, text=None, dashed=True, fill="", outline="red"):
+    node_pos = node.get_position()
+    self.circle_node(node_pos, radius, text, dashed, fill, outline)
+tk.Canvas.circle_node_guess = _circle_node_guess
 
 #
 # Import node definitions
@@ -204,7 +271,7 @@ def render(nodes, time_taken, note):
     # T.insert(END, f"{l1}\n{l2}\n")
     canvas.create_text(width/2-50, height - 20, text=f"{l1}\n{l2}\n",fill="white", font=font.Font(family='Courier New', size=14),
         justify=tk.RIGHT)
-
+    shrink(0.35, x=0, y=0)
     root.mainloop()
 
 algorithm(nodes)._process(render, canvas)
