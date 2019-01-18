@@ -14,7 +14,7 @@ function external = run (varargin)
     % -- Init Functions. Do not Modify, except start settings for GUI_INIT -- %
     [handles, external] = GUI_POPULATE(handles);
     handles = SET_CALLBACKS(handles,external);
-    handles = INIT_VARS(handles,external);
+    [handles, external] = INIT_VARS(handles,external);
     GUI_ACTIVATE(handles);
     if (~isempty(varargin) && ~isempty(varargin{1}))
         b31_loadConfig(external.figure,'init',external,varargin{1});
@@ -77,7 +77,13 @@ function [handles, external] = GUI_POPULATE(handles)
     
     offset = 108;
     [~,handles] = anchoredElement(handles,'style','text','parent',mainSettings,'string',...
-        'Node Settings','location','top','position',[5 (0 + offset) -2 20]);
+        'Node Names','location','top','position',[5 (0 + offset) -2 20]);
+    [external.s4,handles] = titleElement(handles,'style','popupmenu','Title','Node',...
+        'string',{'(1) Base 1'},'Location','top','Position',[5 (21 + offset) -2 20],'Ratios',...
+        [0.01 0.20 0.99],'Parent',mainSettings,'update','dynamic');
+    [external.s5, handles] = editBox(handles,'Title','Name','DefaultText','Base 1','Location','top',...
+        'Position',[5 (45 + offset) 0 20],'Ratios',[0.01 0.20 0.96],'Parent',mainSettings,'update','dynamic');
+    
 %     [external.s3, handles] = titleElement(handles,'Title','Swerling','Location','top',...
 %         'Position',[5 78 0 20],'Ratios',[0.01 0.40 0.96],'Parent',mainSettings,'style','checkbox');
     
@@ -138,11 +144,13 @@ function [handles, external] = GUI_POPULATE(handles)
     
     for i = 1:1:(numBase+numNode)
         if (i > numBase)
-            external.nodes.addNode(x(i),y(i),['Base ' num2str(i)]);
+            external.nodes.addNode(x(i),y(i),['Node ' num2str(i - numBase)]);
         else
-            external.nodes.addBase(x(i),y(i),['Node ' num2str(i - numBase)]);
+            external.nodes.addBase(x(i),y(i),['Base ' num2str(i)]);
         end
     end
+    
+    external.landscape = csvread('landscape.csv',1,0);
     
     external.model = handles.model;
 end
@@ -162,11 +170,63 @@ function handles = SET_CALLBACKS(handles,external)
     set(external.s1, 'Callback',{@num_check,2,handles,external});
     set(external.s2, 'Callback',{@num_check,7,handles,external});
     set(external.s3, 'Callback',{@num_check,7,handles,external});
+    
+    set(external.s4, 'Callback',{@update_names_list,handles,external});
+    set(external.s5, 'Callback',{@update_names_data,handles,external});
 %     set(external.file_loadConfig,'Callback',{@(~,~)close(external.figure)});
     
 end
 
-function num_check(src,~,default,handles,external)
+function update_names_data(src,val,handles,external)
+    idx = get(external.s4,'Value');
+    
+    % If we are now selected on a spot that should not exist, do not bother
+    % trying to update the node or base list data
+    if (idx <= external.nodes.numBases() + external.nodes.numNodes())
+    
+        name = get(external.s5,'String');
+
+        if (idx > external.nodes.numBases())
+            external.nodes.nodeList{idx - external.nodes.numBases()}.name = name;
+        else
+            external.nodes.baseList{idx}.name = name;
+        end
+    end
+    
+    update_names_list(src,val,handles,external);
+end
+
+function update_names_list(src,~,handles,external)
+    idx = get(external.s4,'Value');
+    if (idx > external.nodes.numBases() + external.nodes.numNodes())
+        idx = external.nodes.numBases() + external.nodes.numNodes();
+    end
+    
+    if (idx > 0)
+    
+        external.s4.String = {};
+        for i = 1:1:(external.nodes.numBases() + external.nodes.numNodes())
+            if (i > external.nodes.numBases())
+                external.s4.String{end+1} = ['(' num2str(i) ') ' external.nodes.nodeList{i - external.nodes.numBases()}.name];
+            else
+                external.s4.String{end+1} = ['(' num2str(i) ') ' external.nodes.baseList{i}.name];
+            end
+        end
+        if (idx > external.nodes.numBases())
+            external.s5.String = external.nodes.nodeList{idx - external.nodes.numBases()}.name;
+        else
+            external.s5.String = external.nodes.baseList{idx}.name;
+        end
+        external.s4.Value = idx;
+    else 
+        external.s4.String = {''};
+        external.s4.Value = 1;
+        external.s5.String = '';
+    end
+    
+end
+
+function num_check(src,val,default,handles,external)
     value = real(str2num(get(src,'String'))); %#ok;
     
     if (length(value) ~= 1 || any(isempty(value)) || any(isnan(value)) || value < 0)
@@ -175,20 +235,20 @@ function num_check(src,~,default,handles,external)
         set(src,'String',num2str(value));
         setPlots(handles,external);
     end
+    
+    update_names_list(src,val,handles,external);
 end
 
-function handles = INIT_VARS(handles,external)
+function [handles, external] = INIT_VARS(handles,external)
     
-%     external.numBase = 2;
-%     external.numNode = 7;
     setPlots(handles,external);
+    update_names_data(0,0,handles,external);
     
     % Dragging Plot:
 end
 
 function setPlots(handles, external)
-    
-    landscape = csvread('landscape.csv',1,0);
+    % collect information
     
     numBase = str2num(get(external.s1,'String'));
     numNode = str2num(get(external.s2,'String'));
@@ -206,16 +266,9 @@ function setPlots(handles, external)
     end
     
     while(external.nodes.numBases() < numBase)
-        external.nodes.addBase(50, 100, ['Node ' num2str(external.nodes.numBases()+1)]);
+        external.nodes.addBase(50, 100, ['Base ' num2str(external.nodes.numBases()+1)]);
     end
     
-    cla(external.ax1);
-    cla(external.ax2);
-    
-    % Position Plit
-%     x = linspace(external.xmin + (external.xmax/10),external.xmax - (external.xmax/10),numNode + numBase);
-%     y = linspace(external.ymin + (external.ymax/10),external.ymax - (external.ymax/10),numNode + numBase);
-
     x = []; y = [];
 
     for i = 1:1:(external.nodes.numBases()+external.nodes.numNodes())
@@ -228,9 +281,14 @@ function setPlots(handles, external)
         end
     end
 
-    fill(external.ax1, landscape(:,1),landscape(:,2),'g','LineStyle','--',...
+    cla(external.ax1);
+    cla(external.ax2);
+    
+    % Add the landscape to plot 1
+    fill(external.ax1, external.landscape(:,1),external.landscape(:,2),'g','LineStyle','--',...
     'FaceAlpha',0.1,'EdgeColor','g','LineWidth',2);
     
+    % Add the main scatter plot to plot 1
     hold(external.ax1, 'on');
     h = scatter(external.ax1, x,y,100, 'filled','hittest','on','buttondownfcn',{@clickmarker, handles,external});
     hold(external.ax1, 'off');
@@ -330,14 +388,13 @@ end
 function stopdragging(fig,ev,external)
     set(fig,'windowbuttonmotionfcn','')
     set(fig,'windowbuttonupfcn','')
-    disp('stopDragging');
     
     % Copy over the data from ax1 to ax2
     external.ax2.Children(1).XData=external.ax1.Children(1).XData;
     external.ax2.Children(1).YData=external.ax1.Children(1).YData;
     
+    % Update the range circles on the second plot
     r = str2num(get(external.s3,'String'));
-    
     for i = 1:1:length(external.ax1.Children(1).XData)
         d = r*2;
         px = external.ax1.Children(1).XData(i)-r;
@@ -346,6 +403,7 @@ function stopdragging(fig,ev,external)
         external.ax2.Children(i+1).Position = [px py d d];
     end
     
+    % Store the new locations back into the nodes list
     for i = 1:1:(external.nodes.numBases()+external.nodes.numNodes())
         if (i > external.nodes.numBases()) 
            external.nodes.nodeList{i - external.nodes.numBases()}.x = external.ax1.Children(1).XData(i); 
