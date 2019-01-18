@@ -30,7 +30,7 @@ canvas.grid()
 
 
 def _create_circle(self, x, y, r, **kwargs):
-    return self.create_oval(x-r, y-r, x+r, y+r, **kwargs)
+    return self.create_oval(10*x-r, 10*y-r, 10*x+r, 10*y+r, **kwargs)
 
 
 tk.Canvas.create_circle = _create_circle
