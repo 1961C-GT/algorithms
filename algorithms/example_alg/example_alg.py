@@ -20,7 +20,7 @@ class example_alg(Algorithm):
                 print(m)
 
         # Set the position of one of the nodes
-        self.node_arr['A1'].set_position(50, 50)
+        # self.node_arr['A1'].set_position(50, 50)
 
         # Done!
         callback()
