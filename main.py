@@ -60,7 +60,7 @@ tk.Canvas.create_circle = _create_circle
 
 nodes = {}
 
-with open('./Datasets/' + sys.argv[1]+'.def', 'r') as defs_file:
+with open('./datasets/' + sys.argv[1]+'.def', 'r') as defs_file:
     defs_file.readline()
     node_defs = csv.reader(defs_file)
     for node in node_defs:
@@ -74,13 +74,13 @@ with open('./Datasets/' + sys.argv[1]+'.def', 'r') as defs_file:
 # Import measurements
 #
 
-with open('./Datasets/' + sys.argv[1]+'.dat', 'r') as data_file:
+with open('./datasets/' + sys.argv[1]+'.dat', 'r') as data_file:
     data_file.readline()
     measurements = csv.reader(data_file)
     for m in measurements:
         nodes[m[0]].add_measurement(nodes[m[1]], float(m[2]))
 
-with open('./Datasets/landscape.csv', 'r') as data_file:
+with open('./datasets/landscape.csv', 'r') as data_file:
     data_file.readline()
     line = csv.reader(data_file)
     vals = []
