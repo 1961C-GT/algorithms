@@ -1,4 +1,4 @@
-from Algorithms.algorithm import Algorithm
+from algorithms.algorithm import Algorithm
 
 # > python3 main.py node_defs.csv raw_data.csv example_alg
 
