@@ -3,7 +3,7 @@ from scipy.optimize import minimize
 from scipy.spatial.distance import pdist
 import math
 
-# > python3 main.py node_defs.csv raw_data.csv kevins_alg
+# > python3 main.py <data set> drct_trng
 
 # Implementation of https://www.alanzucconi.com/2017/03/13/positioning-and-trilateration/
 
@@ -18,7 +18,7 @@ def mse(x, base_nodes, node_id):
     return mse / len(base_nodes)
 
 
-class kevins_alg(Algorithm):
+class drct_trng(Algorithm):
     def __init__(self, nodes):
         super().__init__(nodes)
 
