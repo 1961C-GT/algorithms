@@ -65,14 +65,19 @@ function [handles, external] = GUI_POPULATE(handles)
         'position',[1 111 1 0],'location','expand','update','dynamic','clipping','on');
     
     % - Top Lefft (Scroll Panel)
+    offset = 0;
     [~,handles] = anchoredElement(handles,'style','text','parent',mainSettings,'string',...
         'General Settings','location','top','position',[5 15 -2 20]);
     [external.s1, handles] = editBox(handles,'Title','Num. Bases','DefaultText','2','Location','top',...
-        'Position',[5 36 0 20],'Ratios',[0.01 0.40 0.96],'Parent',mainSettings,'update','dynamic');
+        'Position',[5 (36 + offset) 0 20],'Ratios',[0.01 0.40 0.96],'Parent',mainSettings,'update','dynamic');
     [external.s2, handles] = editBox(handles,'Title','Num. Nodes','DefaultText','7','Location','top',...
-        'Position',[5 57 0 20],'Ratios',[0.01 0.40 0.96],'Parent',mainSettings,'update','dynamic');
+        'Position',[5 (57 + offset) 0 20],'Ratios',[0.01 0.40 0.96],'Parent',mainSettings,'update','dynamic');
     [external.s3, handles] = editBox(handles,'Title','Num. Range','DefaultText','200','Location','top',...
-        'Position',[5 78 0 20],'Ratios',[0.01 0.40 0.96],'Parent',mainSettings,'update','dynamic');
+        'Position',[5 (78 + offset) 0 20],'Ratios',[0.01 0.40 0.96],'Parent',mainSettings,'update','dynamic');
+    
+    offset = 108;
+    [~,handles] = anchoredElement(handles,'style','text','parent',mainSettings,'string',...
+        'Node Settings','location','top','position',[5 (0 + offset) -2 20]);
 %     [external.s3, handles] = titleElement(handles,'Title','Swerling','Location','top',...
 %         'Position',[5 78 0 20],'Ratios',[0.01 0.40 0.96],'Parent',mainSettings,'style','checkbox');
     
@@ -124,6 +129,21 @@ function [handles, external] = GUI_POPULATE(handles)
     external.xmin = 0;
     external.ymin = 0;
     
+    external.nodes = Nodes();
+    
+    numBase = str2num(get(external.s1,'String'));
+    numNode = str2num(get(external.s2,'String'));
+    x = linspace(external.xmin + (external.xmax/10),external.xmax - (external.xmax/10),numNode + numBase);
+    y = linspace(external.ymin + (external.ymax/10),external.ymax - (external.ymax/10),numNode + numBase);
+    
+    for i = 1:1:(numBase+numNode)
+        if (i > numBase)
+            external.nodes.addNode(x(i),y(i),['Base ' num2str(i)]);
+        else
+            external.nodes.addBase(x(i),y(i),['Node ' num2str(i - numBase)]);
+        end
+    end
+    
     external.model = handles.model;
 end
 
@@ -173,19 +193,46 @@ function setPlots(handles, external)
     numBase = str2num(get(external.s1,'String'));
     numNode = str2num(get(external.s2,'String'));
     
+    while(external.nodes.numNodes() > numNode)
+        external.nodes.removeNode()
+    end
+    
+    while(external.nodes.numNodes() < numNode)
+        external.nodes.addNode(50, 50, ['Node ' num2str(external.nodes.numNodes()+1)]);
+    end
+    
+    while(external.nodes.numBases() > numBase)
+        external.nodes.removeBase()
+    end
+    
+    while(external.nodes.numBases() < numBase)
+        external.nodes.addBase(50, 100, ['Node ' num2str(external.nodes.numBases()+1)]);
+    end
+    
     cla(external.ax1);
     cla(external.ax2);
     
     % Position Plit
-    x = linspace(external.xmin + (external.xmax/10),external.xmax - (external.xmax/10),numNode + numBase);
-    y = linspace(external.ymin + (external.ymax/10),external.ymax - (external.ymax/10),numNode + numBase);
-    
+%     x = linspace(external.xmin + (external.xmax/10),external.xmax - (external.xmax/10),numNode + numBase);
+%     y = linspace(external.ymin + (external.ymax/10),external.ymax - (external.ymax/10),numNode + numBase);
+
+    x = []; y = [];
+
+    for i = 1:1:(external.nodes.numBases()+external.nodes.numNodes())
+        if (i > external.nodes.numBases()) 
+           x(end+1) = external.nodes.nodeList{i - external.nodes.numBases()}.x; 
+           y(end+1) = external.nodes.nodeList{i - external.nodes.numBases()}.y;
+        else
+           x(end+1) = external.nodes.baseList{i}.x; 
+           y(end+1) = external.nodes.baseList{i}.y;
+        end
+    end
 
     fill(external.ax1, landscape(:,1),landscape(:,2),'g','LineStyle','--',...
     'FaceAlpha',0.1,'EdgeColor','g','LineWidth',2);
     
     hold(external.ax1, 'on');
-    h = scatter(external.ax1, x,y,100, 'filled','hittest','on','buttondownfcn',{@clickmarker, external});
+    h = scatter(external.ax1, x,y,100, 'filled','hittest','on','buttondownfcn',{@clickmarker, handles,external});
     hold(external.ax1, 'off');
 
     % Change color of base stations
@@ -234,15 +281,15 @@ function setPlots(handles, external)
 end
 
 % Draging Functionality
-function clickmarker(src,ev,external)
-    set(ancestor(src,'figure'),'windowbuttonmotionfcn',{@dragmarker,src,external})
+function clickmarker(src,ev,handles,external)
+    set(ancestor(src,'figure'),'windowbuttonmotionfcn',{@dragmarker,src,handles,external})
     set(ancestor(src,'figure'),'windowbuttonupfcn',{@stopdragging,external})
 end
 
-function dragmarker(fig,ev,src,external)
+function dragmarker(fig,ev,src,handles,external)
 
     %get current axes and coords
-    h1=gca;
+    h1=external.ax1;
     coords=get(h1,'currentpoint');
 
     %get all x and y data 
@@ -267,6 +314,17 @@ function dragmarker(fig,ev,src,external)
 
     %update plot
     set(src,'xdata',x_new,'ydata',y_new);
+    
+%     for i = 1:1:(external.nodes.numBases()+external.nodes.numNodes())
+%         if (i > external.nodes.numBases()) 
+%            external.nodes.nodeList{i - external.nodes.numBases()}.x = x_new(i); 
+%            external.nodes.nodeList{i - external.nodes.numBases()}.y = y_new(i);
+%         else
+%            external.nodes.baseList{i}.x = x_new(i); 
+%            external.nodes.baseList{i}.y = y_new(i);
+%         end
+%     end
+%     setPlots(handles, external)
 end
 
 function stopdragging(fig,ev,external)
@@ -286,6 +344,16 @@ function stopdragging(fig,ev,external)
         py = external.ax1.Children(1).YData(i)-r;
         
         external.ax2.Children(i+1).Position = [px py d d];
+    end
+    
+    for i = 1:1:(external.nodes.numBases()+external.nodes.numNodes())
+        if (i > external.nodes.numBases()) 
+           external.nodes.nodeList{i - external.nodes.numBases()}.x = external.ax1.Children(1).XData(i); 
+           external.nodes.nodeList{i - external.nodes.numBases()}.y = external.ax1.Children(1).YData(i);
+        else
+           external.nodes.baseList{i}.x = external.ax1.Children(1).XData(i); 
+           external.nodes.baseList{i}.y = external.ax1.Children(1).YData(i);
+        end
     end
     
 end
