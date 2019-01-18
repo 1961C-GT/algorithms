@@ -34,6 +34,9 @@ class Node:
             size = 10
         canvas.create_circle(self.x, self.y, size, fill=fill)
 
+    def get_measurement(self, node_id):
+        return next(filter(lambda m: m.node2.id == node_id, self.measurements))
+
     def get_measurements(self):
         return self.measurements
 
