@@ -149,8 +149,8 @@ function [handles, external] = GUI_POPULATE(handles)
     external.ax2 = ax2;
     
         
-    external.xmax = 700;
-    external.ymax = 700;
+    external.xmax = 2000;
+    external.ymax = 2000;
     external.xmin = 0;
     external.ymin = 0;
     
@@ -169,7 +169,7 @@ function [handles, external] = GUI_POPULATE(handles)
         end
     end
     
-    external.landscape = csvread('landscape.csv',1,0);
+    external.landscape = csvread('../../datasets/landscape.csv',1,0);
 end
 
 

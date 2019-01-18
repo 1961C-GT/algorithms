@@ -55,6 +55,7 @@ menubar.add_cascade(label="File", menu=filemenu)
 helpmenu = Menu(menubar, tearoff=0)
 menubar.add_cascade(label="Help", menu=helpmenu)
 root.config(menu=menubar)
+# root.attributes('-alpha', 0.8)
 
 # Configure measure utilitity
 # Include globals (for event data transfer)
@@ -126,6 +127,7 @@ def move(x, y):
 
 
 def start_measure(event):
+    # print(f'{event.x/0.35},{event.y/0.35}')
     # Include globals
     global measuring, start_pos, cur_line
     # Save the initial point
@@ -276,7 +278,7 @@ with open('./datasets/landscape.csv', 'r') as data_file:
     vals = []
     for l in line:
         vals = vals + l
-    canvas.create_polygon(vals, fill='#292c34', width=2)
+    canvas.create_polygon(vals, fill='#2d313c', width=2)
 
 #
 # Simulate!
