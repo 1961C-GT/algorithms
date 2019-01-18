@@ -32,6 +32,7 @@ algorithm = getattr(alg_module, alg_name)
 
 
 root = tk.Tk()
+root.resizable(width=False, height=False)
 canvas = tk.Canvas(root, width=width, height=height, borderwidth=0,
                    highlightthickness=0, bg="#22252b")
 canvas.grid(column=0,row=0, columnspan=30)
