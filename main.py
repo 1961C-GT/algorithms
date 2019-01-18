@@ -1,5 +1,6 @@
 import sys
 import importlib
+import math
 
 import csv
 import tkinter as tk
@@ -29,29 +30,92 @@ algorithm = getattr(alg_module, alg_name)
 # Set up graphics
 #
 
+
 root = tk.Tk()
 canvas = tk.Canvas(root, width=width, height=height, borderwidth=0,
                    highlightthickness=0, bg="#22252b")
 canvas.grid(column=0,row=0, columnspan=30)
+# Add menu
 menubar = Menu(root)
 filemenu = Menu(menubar, tearoff=0)
-# filemenu.add_command(label="Save", command=screenshot, accelerator="Cmd+s")
-# filemenu.add_separator()
 filemenu.add_command(label="Exit", command=root.quit, accelerator="Cmd+q")
 menubar.add_cascade(label="File", menu=filemenu)
-
 helpmenu = Menu(menubar, tearoff=0)
 menubar.add_cascade(label="Help", menu=helpmenu)
 root.config(menu=menubar)
 
+# Configure measure utilitity
+# Include globals (for event data transfer)
+global measuring, start_pos
+# Init globals
+start_pos = []
+measuring = False
+# Measure function
+def measure(event):
+    # Include globals
+    global measuring, start_pos, cur_line, cur_line_txt
+    # Check to see if we are measuring
+    if measuring == True:
+        # Try to remove the old elements
+        try:
+            event.widget.delete(cur_line)
+            event.widget.delete(cur_line_txt)
+        except:
+            pass
+        # Calculate the rotation between the two points
+        rotation = 180 - math.degrees(math.atan2(start_pos[1] - event.y,
+            start_pos[0] - event.x));
+        # Normalize the rotation
+        if rotation > 90 and rotation < 270:
+            rotation -= 180
+        # Convert to radians
+        rrotation = math.radians(rotation)
+        # Calculate mid point + rotation offset
+        midx = (start_pos[0] + event.x)/2 - math.sin(rrotation)*10
+        midy = (start_pos[1] + event.y)/2 - math.cos(rrotation)*10
+        # Calculate distance string
+        dist = '{:.0f}ft'\
+            .format(math.sqrt((start_pos[0] - event.x)**2 + (start_pos[1] - event.y)**2))
+        # Create the text
+        cur_line_txt = event.widget.create_text(midx, midy, text=dist,
+            fill="white", font=font.Font(family='Courier New', size=14),
+            justify=tk.LEFT,angle=rotation)
+        # Create the line
+        cur_line = event.widget.create_line(start_pos[0], start_pos[1], event.x,
+            event.y, fill="#3c4048", dash=(3,5), arrow=tk.BOTH)
+# Function that enables the measuring and saved the initial point
+def start_measure(event):
+    # Include globals
+    global measuring, start_pos, cur_line
+    # Save the initial point
+    start_pos = (event.x, event.y)
+    # Set measuring to True
+    measuring = True
+
+def stop_measure(event):
+    # Include globals
+    global measuring, cur_line, cur_line_txt
+    # Set measuring to False
+    measuring = False
+    # Try to remove the old elements
+    try:
+        event.widget.delete(cur_line)
+        event.widget.delete(cur_line_txt)
+    except:
+        pass
+
+# Bind these functions to motion, press, and release
+canvas.bind('<Motion>', measure)
+canvas.bind('<Button-1>', start_measure)
+canvas.bind('<ButtonRelease-1>', stop_measure)
+
+# Init the text field at the bottom of the simulator
 T = Text(root, height=2, font = font.Font(family='Courier New', size=14))
 T.grid(column=0,row=1)
 
-
+# Include a new create_circle method
 def _create_circle(self, x, y, r, **kwargs):
     return self.create_oval(x-r, y-r, x+r, y+r, **kwargs)
-
-
 tk.Canvas.create_circle = _create_circle
 
 #
