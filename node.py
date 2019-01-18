@@ -4,14 +4,14 @@ from measurement import Measurement
 
 
 class Node:
-    def __init__(self, id=None, name=None, isBase=False, x=-1, y=-1):
+    def __init__(self, id=None, name=None, is_base=False, x=-1, y=-1):
         if id is None:
             id = uuid.uuid4()
         if name is None:
             name = ""
         self.id = id
         self.name = name
-        self.isBase = isBase
+        self.is_base = is_base
         self.x = x  # random.randint(25, 600)
         self.y = y  # random.randint(25, 600)
         self.measurements = []
@@ -29,7 +29,7 @@ class Node:
     def show(self, canvas):
         fill = "white"
         size = 5
-        if self.isBase:
+        if self.is_base:
             fill = "orange"
             size = 10
         canvas.create_circle(self.x, self.y, size, fill=fill)
