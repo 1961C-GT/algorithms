@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import sys
 import importlib
 import math
@@ -14,8 +16,16 @@ width = 700
 height = 700
 move_amt = 20
 
-print("Data File: " + sys.argv[1])
-print("Algorithm: " + sys.argv[2])
+if len(sys.argv) < 3:
+    print("Using default data files...")
+    dat_file = "random"
+    alg_name = "drct_trng"
+else:
+    dat_file = sys.argv[1]
+    alg_name = sys.argv[2]
+
+print("Data File: " + dat_file)
+print("Algorithm: " + alg_name)
 
 # python3 main.py random example_alg
 
@@ -23,7 +33,6 @@ print("Algorithm: " + sys.argv[2])
 # Import algorithm
 #
 
-alg_name = sys.argv[2]
 alg_module = importlib.import_module('algorithms.' + alg_name + '.' + alg_name)
 algorithm = getattr(alg_module, alg_name)
 
@@ -174,7 +183,7 @@ tk.Canvas.create_circle = _create_circle
 
 nodes = {}
 
-with open('./datasets/' + sys.argv[1] + '.def', 'r') as defs_file:
+with open('./datasets/' + dat_file + '.def', 'r') as defs_file:
     defs_file.readline()
     node_defs = csv.reader(defs_file)
     for node in node_defs:
@@ -189,7 +198,7 @@ with open('./datasets/' + sys.argv[1] + '.def', 'r') as defs_file:
 # Import measurements
 #
 
-with open('./datasets/' + sys.argv[1] + '.dat', 'r') as data_file:
+with open('./datasets/' + dat_file + '.dat', 'r') as data_file:
     data_file.readline()
     measurements = csv.reader(data_file)
     for m in measurements:
@@ -212,10 +221,10 @@ def render(nodes, time_taken, note):
     for key, node in nodes.items():
         node.show_real(canvas)
         node.show(canvas)
-    root.wm_title(f"Algorithm Result [{sys.argv[2]}]")
+    root.wm_title(f"Algorithm Result [{alg_name}]")
     t = "%.2fms" % (time_taken*1000)
     l1 = "Algorithm      : {:17s} || # Elements : {:20s}".format(
-        sys.argv[2], str(len(nodes)))
+        alg_name, str(len(nodes)))
     l2 = "Execution Time : {:17s} || # Note     : {:20s}".format(t, note)
     # T.insert(END, f"{l1}\n{l2}\n")
     canvas.create_text(width/2-50, height - 20, text=f"{l1}\n{l2}\n", fill="white", font=font.Font(family='Courier New', size=14),
