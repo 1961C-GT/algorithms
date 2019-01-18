@@ -3,13 +3,14 @@ import importlib
 
 import csv
 import tkinter as tk
+from tkinter import font
 from tkinter import *
 
 from node import Node
 from measurement import Measurement
 
-width = 650
-height = 650
+width = 700
+height = 700
 
 print("Node Defs: " + sys.argv[1])
 print("Data File: " + sys.argv[2])
@@ -30,7 +31,7 @@ algorithm = getattr(alg_module, alg_name)
 root = tk.Tk()
 canvas = tk.Canvas(root, width=width, height=height, borderwidth=0,
                    highlightthickness=0, bg="black")
-canvas.grid()
+canvas.grid(column=0,row=0, columnspan=30)
 menubar = Menu(root)
 filemenu = Menu(menubar, tearoff=0)
 # filemenu.add_command(label="Save", command=screenshot, accelerator="Cmd+s")
@@ -41,6 +42,9 @@ menubar.add_cascade(label="File", menu=filemenu)
 helpmenu = Menu(menubar, tearoff=0)
 menubar.add_cascade(label="Help", menu=helpmenu)
 root.config(menu=menubar)
+
+T = Text(root, height=2, font = font.Font(family='Courier New', size=14))
+T.grid(column=0,row=1)
 
 
 def _create_circle(self, x, y, r, **kwargs):
@@ -80,10 +84,13 @@ with open(sys.argv[2], 'r') as data_file:
 #
 
 
-def render(nodes):
+def render(nodes, time_taken):
     for key, node in nodes.items():
+        node.show_real(canvas)
         node.show(canvas)
     root.wm_title(f"Algorithm Result [{sys.argv[3]}]")
+    t = "%.2fus" % (time_taken*1000000)
+    T.insert(END, f"Algorithm      | {sys.argv[2]}\nExecution Time | {t}\n")
     root.mainloop()
 
 algorithm(nodes)._process(render, canvas)

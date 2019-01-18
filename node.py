@@ -12,8 +12,10 @@ class Node:
         self.id = id
         self.name = name
         self.isBase = isBase
-        self.x = x  # random.randint(25, 600)
-        self.y = y  # random.randint(25, 600)
+        self.real_x = x  # random.randint(25, 600)
+        self.real_y = y  # random.randint(25, 600)
+        self.x = -1
+        self.y = -1
         self.measurements = []
 
     def add_measurement(self, nodeB, dist):
@@ -26,6 +28,9 @@ class Node:
     def get_position(self):
         return (self.x, self.y)
 
+    def get_real_position(self):
+        return (self.real_x, self.real_y)
+
     def show(self, canvas):
         fill = "white"
         size = 5
@@ -33,6 +38,14 @@ class Node:
             fill = "orange"
             size = 10
         canvas.create_circle(self.x, self.y, size, fill=fill)
+
+    def show_real(self, canvas):
+        fill = "#444444"
+        size = 5
+        if self.isBase:
+            fill = "#5f2f00"
+            size = 10
+        canvas.create_circle(self.real_x, self.real_y, size, fill=fill)
 
     def get_measurements(self):
         return self.measurements

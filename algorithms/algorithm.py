@@ -48,7 +48,7 @@ class Algorithm:
         print(
             '##########################################################################\n')
         print("Algorithm time: %.2fus" % ((self.end - self.start)*1000000))
-        self._callback(self.node_arr)
+        self._callback(self.node_arr, self.end-self.start)
 
     def process(self, callback):
         pass

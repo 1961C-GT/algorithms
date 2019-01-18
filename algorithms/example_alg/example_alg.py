@@ -9,7 +9,7 @@ class example_alg(Algorithm):
 
     def process(self, callback, canvas):
         # Example direct canvas interaction
-        canvas.create_circle(100, 100, 10, fill="red")
+        # canvas.create_circle(100, 100, 10, fill="red")
         # canvas.create_line(0, 100, 200, 0, fill="red", dash=(4, 4))
         # canvas.create_rectangle(50, 25, 150, 75, fill="blue")
         # canvas.create_oval(x-r, y-r, x+r, y+r, **kwargs)
