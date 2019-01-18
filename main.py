@@ -3,9 +3,13 @@ import importlib
 
 import csv
 import tkinter as tk
+from tkinter import *
 
 from node import Node
 from measurement import Measurement
+
+width = 650
+height = 650
 
 print("Node Defs: " + sys.argv[1])
 print("Data File: " + sys.argv[2])
@@ -24,9 +28,19 @@ algorithm = getattr(alg_module, alg_name)
 #
 
 root = tk.Tk()
-canvas = tk.Canvas(root, width=650, height=650, borderwidth=0,
+canvas = tk.Canvas(root, width=width, height=height, borderwidth=0,
                    highlightthickness=0, bg="black")
 canvas.grid()
+menubar = Menu(root)
+filemenu = Menu(menubar, tearoff=0)
+# filemenu.add_command(label="Save", command=screenshot, accelerator="Cmd+s")
+# filemenu.add_separator()
+filemenu.add_command(label="Exit", command=root.quit, accelerator="Cmd+q")
+menubar.add_cascade(label="File", menu=filemenu)
+
+helpmenu = Menu(menubar, tearoff=0)
+menubar.add_cascade(label="Help", menu=helpmenu)
+root.config(menu=menubar)
 
 
 def _create_circle(self, x, y, r, **kwargs):
@@ -69,7 +83,7 @@ with open(sys.argv[2], 'r') as data_file:
 def render(nodes):
     for key, node in nodes.items():
         node.show(canvas)
-    root.wm_title("Circles and Arcs")
+    root.wm_title(f"Algorithm Result [{sys.argv[3]}]")
     root.mainloop()
 
 algorithm(nodes)._process(render, canvas)
