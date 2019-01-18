@@ -108,18 +108,10 @@ def shrink(scale, x=None, y=None):
     for obj in objs:
         if canvas.type(obj) == "text" and not 'scale' in canvas.gettags(obj):
             continue
-<<<<<<< HEAD
         if x is None or y is None:
             x = root.winfo_pointerx() - root.winfo_rootx()
             y = root.winfo_pointery() - root.winfo_rooty()
         canvas.scale(obj,x,y,scale,scale)
-=======
-        x = root.winfo_pointerx()
-        y = root.winfo_pointery()
-        abs_coord_x = root.winfo_pointerx() - root.winfo_rootx()
-        abs_coord_y = root.winfo_pointery() - root.winfo_rooty()
-        canvas.scale(obj, abs_coord_x, abs_coord_y, scale, scale)
->>>>>>> d567d2d072727ea4852d6a8bbd6d1f0320df04bf
     universal_scale *= scale
 
 
@@ -141,17 +133,11 @@ def start_measure(event):
     # Set measuring to True
     measuring = True
 
-<<<<<<< HEAD
 def zoom(scale, center=False):
     if center is False:
         shrink(scale)
     else:
         shrink(scale, x=0, y=0)
-=======
-
-def zoom_in(event):
-    shrink(0.9)
->>>>>>> d567d2d072727ea4852d6a8bbd6d1f0320df04bf
 
 
 def stop_measure(event):
@@ -173,21 +159,12 @@ def stop_measure(event):
 # Bind these functions to motion, press, and release
 canvas.bind('<Motion>', measure)
 canvas.bind('<Button-1>', start_measure)
-<<<<<<< HEAD
 canvas.bind('<Button-3>', lambda e: zoom(0.9))
 canvas.bind('<Button-2>', lambda e: zoom(0.9))
 root.bind('<Up>', lambda e: move(0,move_amt))
 root.bind('<Down>', lambda e: move(0,-move_amt))
 root.bind('<Left>', lambda e: move(move_amt,0))
 root.bind('<Right>', lambda e: move(-move_amt,0))
-=======
-canvas.bind('<Button-3>', zoom_in)
-canvas.bind('<Button-2>', zoom_in)
-root.bind('<Up>', lambda e: move(0, -move_amt))
-root.bind('<Down>', lambda e: move(0, move_amt))
-root.bind('<Left>', lambda e: move(-move_amt, 0))
-root.bind('<Right>', lambda e: move(move_amt, 0))
->>>>>>> d567d2d072727ea4852d6a8bbd6d1f0320df04bf
 canvas.bind('<ButtonRelease-1>', stop_measure)
 
 # Init the text field at the bottom of the simulator
@@ -316,15 +293,9 @@ def render(nodes, time_taken, note):
         alg_name, str(len(nodes)))
     l2 = "Execution Time : {:17s} || # Note     : {:20s}".format(t, note)
     # T.insert(END, f"{l1}\n{l2}\n")
-<<<<<<< HEAD
     canvas.create_text(width/2-50, height - 20, text=f"{l1}\n{l2}\n",fill="white", font=font.Font(family='Courier New', size=14),
         justify=tk.RIGHT)
     shrink(0.35, x=0, y=0)
-=======
-    canvas.create_text(width/2-50, height - 20, text=f"{l1}\n{l2}\n", fill="white", font=font.Font(family='Courier New', size=14),
-                       justify=tk.RIGHT)
-
->>>>>>> d567d2d072727ea4852d6a8bbd6d1f0320df04bf
     root.mainloop()
 
 
