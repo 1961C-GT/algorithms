@@ -565,8 +565,8 @@ function generateMeasurements(~,~,external)
                 continue;
             end
             x1 = nodeA.x;
-            x2 = nodeA.y;
-            y1 = nodeB.x;
+            y1 = nodeA.y;
+            x2 = nodeB.x;
             y2 = nodeB.y;
             dist = sqrt((x2 - x1) .^2 + (y2 - y1) .^2);
             
