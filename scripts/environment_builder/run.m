@@ -16,7 +16,7 @@ function external = run (varargin)
     [handles, external] = INIT_VARS(handles,external);
     GUI_ACTIVATE(handles);
     if (~isempty(varargin) && ~isempty(varargin{1}))
-        b31_loadConfig(external.figure,'init',external,varargin{1});
+        % b31_loadConfig(external.figure,'init',external,varargin{1});
     end
     set(handles.f, 'pointer', 'arrow');
     drawnow;
@@ -149,8 +149,8 @@ function [handles, external] = GUI_POPULATE(handles)
     external.ax2 = ax2;
     
         
-    external.xmax = 700;
-    external.ymax = 700;
+    external.xmax = 2000;
+    external.ymax = 2000;
     external.xmin = 0;
     external.ymin = 0;
     external.storePath = '../../datasets/';
@@ -318,8 +318,8 @@ function setPlots(handles, external)
     cla(external.ax2);
     
     % Add the landscape to plot 1
-    fill(external.ax1, external.landscape(:,1),external.landscape(:,2),'g','LineStyle','--',...
-    'FaceAlpha',0.1,'EdgeColor','g','LineWidth',2);
+    fill(external.ax1, external.landscape(:,1),external.landscape(:,2),'g','LineStyle','-',...
+    'FaceAlpha',0.1,'EdgeColor','g','LineWidth',0.2);
     
     % Add the main scatter plot to plot 1
     hold(external.ax1, 'on');
@@ -340,8 +340,8 @@ function setPlots(handles, external)
     h.CData = c;
     % /Position Plot
     
-    fill(external.ax2, external.landscape(:,1),external.landscape(:,2),'g','LineStyle','--',...
-    'FaceAlpha',0.1,'EdgeColor','g','LineWidth',2);
+    fill(external.ax2, external.landscape(:,1),external.landscape(:,2),'g','LineStyle','-',...
+    'FaceAlpha',0.1,'EdgeColor','g','LineWidth',0.2);
     
     % Text Labels
     for i = 1:1:length(x)
