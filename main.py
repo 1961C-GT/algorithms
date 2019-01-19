@@ -191,8 +191,8 @@ def _connect_nodes(self, node1_pos, node2_pos, text=None, dashed=True, color="#3
         # Convert to radians
         rrotation = math.radians(rotation)
         # Calculate mid point + rotation offset
-        midx = (node1_pos[0] + node2_pos[0])/2 - math.sin(rrotation)*10
-        midy = (node1_pos[1] + node2_pos[1])/2 - math.cos(rrotation)*10
+        midx = (node1_pos[0] + node2_pos[0])/2 - math.sin(rrotation)*20
+        midy = (node1_pos[1] + node2_pos[1])/2 - math.cos(rrotation)*20
         self.create_text(midx, midy, text=text,
             fill="white", font=font.Font(family='Courier New', size=14),
             justify=tk.LEFT,angle=rotation,tag='scale')
@@ -286,8 +286,8 @@ with open('./datasets/landscape.csv', 'r') as data_file:
 
 def render(nodes, time_taken, note):
     for key, node in nodes.items():
-        node.show_real(canvas)
         node.show(canvas)
+        node.show_real(canvas)
     root.wm_title(f"Algorithm Result [{alg_name}]")
     t = "%.2fms" % (time_taken*1000)
     l1 = "Algorithm      : {:17s} || # Elements : {:20s}".format(

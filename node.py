@@ -1,6 +1,7 @@
 import uuid
 import random
 from measurement import Measurement
+from algorithms.algorithm import Vector2
 from tkinter import font, Canvas
 import tkinter as tk
 
@@ -36,11 +37,21 @@ class Node:
         self.x = x
         self.y = y
 
+    def set_position_vec(self, pos):
+        self.x = pos.x
+        self.y = pos.y
+
     def get_position(self):
         return (self.x, self.y)
 
+    def get_position_vec(self):
+        return Vector2(self.x, self.y)
+
     def get_real_position(self):
         return (self.real_x, self.real_y)
+
+    def get_real_position_vec(self):
+        return Vector2(self.real_x, self.real_y)
 
     @staticmethod
     def nodeEnter(event):
@@ -92,7 +103,7 @@ class Node:
         if(self.x is None or self.y is None or self.is_base is True):
             return
         fill = "white"
-        size = 5
+        size = 10
         obj = canvas.create_circle(
             self.x, self.y, size, fill=fill, outline="", tags=['node'])
         if self.real_obj is not None:
@@ -112,10 +123,10 @@ class Node:
         if(self.real_x is None or self.real_y is None):
             return
         fill = "#373B41"
-        size = 5
+        size = 10
         if self.is_base:
             fill = "orange"
-            size = 7
+            size = 20
         obj = canvas.create_circle(
             self.real_x, self.real_y, size, fill=fill, outline="", tags=['node'])
         if self.guess_obj is not None:
