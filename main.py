@@ -240,6 +240,10 @@ def _circle_node_guess(self, node, radius, text=None, dashed=True, fill="", outl
     self.circle_node(node_pos, radius, text, dashed, fill, outline)
 tk.Canvas.circle_node_guess = _circle_node_guess
 
+def _circle_area(self, x, y, radius, text=None, dashed=True, fill="", outline="red"):
+    self.circle_node((x,y), radius, text, dashed, fill, outline)
+tk.Canvas.circle_area = _circle_area
+
 #
 # Import node definitions
 #
