@@ -571,12 +571,14 @@ function generateMeasurements(~,~,external)
             dist = sqrt((x2 - x1) .^2 + (y2 - y1) .^2);
             
             % Factor in range fluctuation using a normal dist
-            rangeOffset = normrnd(0,rangeSd);
+            % rangeOffset = normrnd(0,rangeSd);
+            rangeOffset = randn(1) * rangeSd + 0;
             if (dist > range + rangeOffset)
                 continue;
             end
             
-            distOffset = normrnd(0,distSd);
+            % distOffset = normrnd(0,distSd);
+            distOffset = randn(1) * distSd + 0;
             distVal = dist+distOffset;
             
             if (distVal - dist > maxErr)
