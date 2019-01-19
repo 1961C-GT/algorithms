@@ -23,8 +23,8 @@ class example_alg(Algorithm):
         print(self.nodes)
         self.nodes['3'].set_position(50, 50)
 
-        canvas.connect_nodes_guess(self.node_arr['1'], self.node_arr['2'], text="test", color="red", dashed=False)
-        canvas.circle_node_guess(self.node_arr['2'], 300, text="Test Zone", dashed=True, fill="", outline="orange")
+        canvas.connect_nodes_guess(self.nodes['1'], self.nodes['2'], text="test", color="red", dashed=False)
+        canvas.circle_node_guess(self.nodes['2'], 300, text="Test Zone", dashed=True, fill="", outline="orange")
 
         # Done!
         callback()

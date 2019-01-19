@@ -43,7 +43,7 @@ algorithm = getattr(alg_module, alg_name)
 #
 
 root = tk.Tk()
-root.resizable(width=False, height=False)
+# root.resizable(width=False, height=False)
 canvas = tk.Canvas(root, width=width, height=height, borderwidth=0,
                    highlightthickness=0, bg="#22252b")
 canvas.grid(column=0, row=0, columnspan=30)
@@ -127,7 +127,7 @@ def move(x, y):
 
 
 def start_measure(event):
-    # print(f'{event.x/0.35},{event.y/0.35}')
+    # print(f'{event.x},{event.y}')
     # Include globals
     global measuring, start_pos, cur_line
     # Save the initial point
@@ -169,15 +169,11 @@ root.bind('<Left>', lambda e: move(move_amt,0))
 root.bind('<Right>', lambda e: move(-move_amt,0))
 canvas.bind('<ButtonRelease-1>', stop_measure)
 
-# Init the text field at the bottom of the simulator
-# T = Text(root, height=2, font = font.Font(family='Courier New', size=14))
-# T.grid(column=0,row=1)
-
 # Include a new create_circle method
 
 
 def _create_circle(self, x, y, r, **kwargs):
-    return self.create_oval(10*x-r, 10*y-r, 10*x+r, 10*y+r, **kwargs)
+    return self.create_oval(x-r, y-r, x+r, y+r, **kwargs)
 
 
 tk.Canvas.create_circle = _create_circle
@@ -223,7 +219,6 @@ def _circle_node(self, node_pos, radius, text, dashed, fill, outline):
         return
     if text is not None:
         ypos = node_pos[1]-radius-20
-        print(ypos)
         if ypos < 0:
             ypos = node_pos[1]+radius+20
         self.create_text(node_pos[0],ypos,text=text,
@@ -297,7 +292,7 @@ def render(nodes, time_taken, note):
     # T.insert(END, f"{l1}\n{l2}\n")
     canvas.create_text(width/2-50, height - 20, text=f"{l1}\n{l2}\n",fill="white", font=font.Font(family='Courier New', size=14),
         justify=tk.RIGHT)
-    shrink(0.35, x=0, y=0)
+    shrink(width/area_width, x=0, y=0)
     root.mainloop()
 
 

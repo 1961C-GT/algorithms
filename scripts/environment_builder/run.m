@@ -16,7 +16,7 @@ function external = run (varargin)
     [handles, external] = INIT_VARS(handles,external);
     GUI_ACTIVATE(handles);
     if (~isempty(varargin) && ~isempty(varargin{1}))
-        b31_loadConfig(external.figure,'init',external,varargin{1});
+        % b31_loadConfig(external.figure,'init',external,varargin{1});
     end
     set(handles.f, 'pointer', 'arrow');
     drawnow;
