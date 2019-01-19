@@ -11,6 +11,16 @@ classdef Nodes < handle
             obj.baseList = {};
         end
         
+        function list = getAll(obj)
+            list = {};
+            for i = 1:1:obj.numBases()
+                list{end+1} = obj.baseList{i};
+            end
+            for i = 1:1:obj.numNodes()
+                list{end+1} = obj.nodeList{i};
+            end
+        end
+        
         function addNode(obj, x, y, name)
             obj.nodeList{end+1} = Node(x,y,false,name);
         end

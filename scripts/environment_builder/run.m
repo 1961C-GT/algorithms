@@ -153,6 +153,7 @@ function [handles, external] = GUI_POPULATE(handles)
     external.ymax = 700;
     external.xmin = 0;
     external.ymin = 0;
+    external.storePath = '../../datasets/';
     
     external.nodes = Nodes();
     
@@ -169,7 +170,7 @@ function [handles, external] = GUI_POPULATE(handles)
         end
     end
     
-    external.landscape = csvread('landscape.csv',1,0);
+    external.landscape = csvread([external.storePath 'landscape.csv'],1,0);
 end
 
 
@@ -183,6 +184,7 @@ function handles = SET_CALLBACKS(handles,external)
     
     set(external.file_quit,'Callback',{@(~,~)close(external.figure)});
     set(external.i3,'Callback',{@generateMeasurements,external});
+    set(external.i4,'Callback',{@check_text,'env',handles,external});
     
     set(external.s1, 'Callback',{@num_check,2,handles,external});
     set(external.s2, 'Callback',{@num_check,7,handles,external});
@@ -469,13 +471,19 @@ function dragmarker(fig,ev,src,ax,index,handles,external)
 %     setPlots(handles, external);
 end
 
-function check_content(src,~,default,handles,external) 
+function check_content(src,~,default,~,~) 
     value = real(str2num(get(src,'String'))); %#ok;
     
-    if (length(value) ~= 1 || any(isempty(value)) || any(isnan(value)) || value <= 0)
+    if (length(value) ~= 1 || any(isempty(value)) || any(isnan(value)) || value < 0)
         set(src,'String',num2str(default));
     else
         set(src,'String',num2str(value));
+    end
+end
+
+function check_text (src,~,default,~,~) 
+    if ~isempty(regexp(get(src,'String'), '[/\*:?"<>|]', 'once'))
+        set(src,'String',default);
     end
 end
 
@@ -524,21 +532,23 @@ function generateMeasurements(~,~,external)
     x = external.ax1.Children(1).XData;
     y = external.ax1.Children(1).YData;
     range = str2num(get(external.s3,'String'));
-    
-    names = {'Base1','Base2','Node1','Node2','Node3','Node4','Node5','Node6','Node7'};
-    base = [1,1,0,0,0,0,0,0,0];
-    
-    numEl = length(x);
+
    
-    fdefs = fopen([get(external.i4,'String') '.def'],'w');
+    fdefs = fopen([external.storePath get(external.i4,'String') '.def'],'w');
     fprintf(fdefs,'NodeID,Name,Is Base?,X coordinate,Y coordinate\n');
-    for i = 1:1:numEl
-        fprintf(fdefs,'%d,%s,%d,%d,%d\n',i,names{i},base(i),x(i),y(i));
+    
+    nodes = external.nodes.getAll();
+    numEl = length(nodes);
+    
+    for i = 1:1:length(nodes)
+        node = nodes{i};
+        fprintf(fdefs,'%d,%s,%d,%d,%d\n',i,...
+            node.name,node.isBase,node.x,node.y);
     end
     fclose(fdefs);
     
     
-    fdat = fopen([get(external.i4,'String') '.dat'],'w');
+    fdat = fopen([external.storePath get(external.i4,'String') '.dat'],'w');
     fprintf(fdat,'NodeA,NodeA,Distance\n');
     
     distSd = external.s6.Value;
@@ -548,14 +558,16 @@ function generateMeasurements(~,~,external)
 
     count = 1;
     for a = 1:1:numEl
+        nodeA = nodes{a};
         for b = 1:1:numEl
+            nodeB = nodes{b};
             if (a == b || rand() < dropProb)
                 continue;
             end
-            x1 = x(a);
-            x2 = x(b);
-            y1 = y(a);
-            y2 = y(b);
+            x1 = nodeA.x;
+            x2 = nodeA.y;
+            y1 = nodeB.x;
+            y2 = nodeB.y;
             dist = sqrt((x2 - x1) .^2 + (y2 - y1) .^2);
             
             % Factor in range fluctuation using a normal dist
