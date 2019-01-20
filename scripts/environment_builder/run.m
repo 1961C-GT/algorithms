@@ -534,6 +534,7 @@ end
 % / Dragging Functionality
 
 function loadEnv(src,~,handles,external)
+    uiwaitbar(external.wBar, 0,'set');
     [file,path,idx] = uigetfile(external.storePath, '*.mat');
     if (idx ~= 0)
         load([path file]);
@@ -550,37 +551,53 @@ function loadEnv(src,~,handles,external)
         external.s8.Value = data.settings.s8.Value;
         external.s8.String = data.settings.s8.String;
         % Env Name
-        external.i1.Value = data.settings.i1.Value;
-        external.i1.String = data.settings.i1.String;
+        external.i4.Value = data.settings.i4.Value;
+        external.i4.String = data.settings.i4.String;
         
-        external.nodes = data.nodes;
+        external.nodes.nodeList = data.nodes.nodeList;
+        external.nodes.baseList = data.nodes.baseList;
+        
+        uiwaitbar(external.wBar, 0.5,'set');
         
         setPlots(handles, external);
     end
+    uiwaitbar(external.wBar, 1,'set');
 end
 
 function saveEnv(src,~,external)
+    uiwaitbar(external.wBar, 0,'set');
+    [file, path] = uiputfile({'.mat'}, 'Environment Save Location',[external.storePath external.i4.String '.mat']);
+    if (path ~= 0)
+        % Range
+        data.settings.s3.Value = external.s3.Value;
+        data.settings.s3.String = external.s3.String;
+        % Measurement Fluc
+        data.settings.s6.Value = external.s6.Value;
+        data.settings.s6.String = external.s6.String;
+        % Measurement Fluc Gain
+        data.settings.s7.Value = external.s7.Value;
+        data.settings.s7.String = external.s7.String;
+        % Max Error
+        data.settings.s8.Value = external.s8.Value;
+        data.settings.s8.String = external.s8.String;
+        % Env Name
+        
+        [~,name,~] = fileparts([path file]);
+        
+        data.settings.i4.Value = external.i4.Value;
+        data.settings.i4.String = name;
+        
+        uiwaitbar(external.wBar, 0.5,'set');
+        
+        % Node data
+        data.nodes.nodeList = external.nodes.nodeList;
+        data.nodes.baseList = external.nodes.baseList;
+        
+        save([path file],'data');
     
-    % Range
-    data.settings.s3.Value = external.s3.Value;
-    data.settings.s3.String = external.s3.String;
-    % Measurement Fluc
-    data.settings.s6.Value = external.s6.Value;
-    data.settings.s6.String = external.s6.String;
-    % Measurement Fluc Gain
-    data.settings.s7.Value = external.s7.Value;
-    data.settings.s7.String = external.s7.String;
-    % Max Error
-    data.settings.s8.Value = external.s8.Value;
-    data.settings.s8.String = external.s8.String;
-    % Env Name
-    data.settings.i1.Value = external.i1.Value;
-    data.settings.i1.String = external.i1.String;
+    end
     
-    % Node data
-    data.nodes = external.nodes;
-    
-    save([external.storePath external.i1.String '.mat'],'data');
+    uiwaitbar(external.wBar, 1,'set');
     
 end
 
