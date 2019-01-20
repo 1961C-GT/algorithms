@@ -533,7 +533,7 @@ function stopdragging(fig,ev,ax,handles,external)
 end
 % / Dragging Functionality
 
-function loadEnv(src,~,handles,external)
+function loadEnv(~,~,handles,external)
     uiwaitbar(external.wBar, 0,'set');
     [file,path,idx] = uigetfile(external.storePath, '*.mat');
     if (idx ~= 0)
@@ -564,7 +564,7 @@ function loadEnv(src,~,handles,external)
     uiwaitbar(external.wBar, 1,'set');
 end
 
-function saveEnv(src,~,external)
+function saveEnv(~,~,external)
     uiwaitbar(external.wBar, 0,'set');
     [file, path] = uiputfile({'.mat'}, 'Environment Save Location',[external.storePath external.i4.String '.mat']);
     if (path ~= 0)
