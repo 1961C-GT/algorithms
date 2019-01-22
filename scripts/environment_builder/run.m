@@ -71,7 +71,7 @@ function [handles, external] = GUI_POPULATE(handles)
         'Position',[5 (36 + offset) 0 20],'Ratios',[0.01 0.40 0.96],'Parent',mainSettings,'update','dynamic');
     [external.s2, handles] = editBox(handles,'Title','Num. Nodes','DefaultText','7','Location','top',...
         'Position',[5 (57 + offset) 0 20],'Ratios',[0.01 0.40 0.96],'Parent',mainSettings,'update','dynamic');
-    [external.s3, handles] = editBox(handles,'Title','Node Range','DefaultText','200','Location','top',...
+    [external.s3, handles] = editBox(handles,'Title','Node Range','DefaultText','600','Location','top',...
         'Position',[5 (78 + offset) 0 20],'Ratios',[0.01 0.40 0.96],'Parent',mainSettings,'update','dynamic');
     
     offset = 108;
@@ -560,8 +560,9 @@ function loadEnv(~,~,handles,external)
         uiwaitbar(external.wBar, 0.5,'set');
         
         setPlots(handles, external);
+        uiwaitbar(external.wBar, 1,'set');
     end
-    uiwaitbar(external.wBar, 1,'set');
+    
 end
 
 function saveEnv(~,~,external)
@@ -594,85 +595,92 @@ function saveEnv(~,~,external)
         data.nodes.baseList = external.nodes.baseList;
         
         save([path file],'data');
-    
+        uiwaitbar(external.wBar, 1,'set');
     end
     
-    uiwaitbar(external.wBar, 1,'set');
+    
     
 end
 
 function generateMeasurements(~,~,external)
     
-    x = external.ax1.Children(1).XData;
-    y = external.ax1.Children(1).YData;
-    range = str2num(get(external.s3,'String'));
-
-   
-    fdefs = fopen([external.storePath get(external.i4,'String') '.def'],'w');
-    fprintf(fdefs,'NodeID,Name,Is Base?,X coordinate,Y coordinate\n');
+    uiwaitbar(external.wBar,0,'set');
     
-    nodes = external.nodes.getAll();
-    numEl = length(nodes);
-    
-    for i = 1:1:length(nodes)
-        node = nodes{i};
-        fprintf(fdefs,'%d,%s,%d,%d,%d\n',i,...
-            node.name,node.isBase,node.x,node.y);
-    end
-    fclose(fdefs);
-    
-    
-    fdat = fopen([external.storePath get(external.i4,'String') '.dat'],'w');
-    fprintf(fdat,'NodeA,NodeA,Distance\n');
-    
-    distSd = external.s6.Value;
-    rangeSd = external.s7.Value;
-    maxErr = external.s8.Value;
-    dropProb = external.s9.Value;
-
-    count = 1;
-    for a = 1:1:numEl
-        nodeA = nodes{a};
-        for b = 1:1:numEl
-            nodeB = nodes{b};
-            if (a == b || rand() < dropProb)
-                continue;
-            end
-            x1 = nodeA.x;
-            y1 = nodeA.y;
-            x2 = nodeB.x;
-            y2 = nodeB.y;
-            dist = sqrt((x2 - x1) .^2 + (y2 - y1) .^2);
-            
-            % Factor in range fluctuation using a normal dist
-            % rangeOffset = normrnd(0,rangeSd);
-            rangeOffset = randn(1) * rangeSd + 0;
-            if (dist > range + rangeOffset)
-                continue;
-            end
-            
-            % distOffset = normrnd(0,distSd);
-            distOffset = randn(1) * distSd + 0;
-            distVal = dist+distOffset;
-            
-            if (distVal - dist > maxErr)
-                distVal = dist + maxErr;
-            elseif (distVal - dist < -maxErr)
-                distVal = dist - maxErr;
-            end
-
-            % Write to the file
-            fprintf(fdat,'%d,%d,%d\n',a,b,distVal);
-            
-            % Update the loading bar
-            uiwaitbar(external.wBar,count/(numEl*(numEl-1)),'set');
-            count = count + 1;
+    path = uigetdir(external.storePath, 'Output Location');
+    if (path ~= 0)
+        
+        x = external.ax1.Children(1).XData;
+        y = external.ax1.Children(1).YData;
+        range = str2num(get(external.s3,'String'));
+        
+        
+        fdefs = fopen([path get(external.i4,'String') '.def'],'w');
+        fprintf(fdefs,'NodeID,Name,Is Base?,X coordinate,Y coordinate\n');
+        
+        nodes = external.nodes.getAll();
+        numEl = length(nodes);
+        
+        for i = 1:1:length(nodes)
+            node = nodes{i};
+            fprintf(fdefs,'%d,%s,%d,%d,%d\n',i,...
+                node.name,node.isBase,node.x,node.y);
         end
+        fclose(fdefs);
+        
+        
+        fdat = fopen([path get(external.i4,'String') '.dat'],'w');
+        fprintf(fdat,'NodeA,NodeA,Distance\n');
+        
+        distSd = external.s6.Value;
+        rangeSd = external.s7.Value;
+        maxErr = external.s8.Value;
+        dropProb = external.s9.Value;
+        
+        count = 1;
+        for a = 1:1:numEl
+            nodeA = nodes{a};
+            for b = 1:1:numEl
+                nodeB = nodes{b};
+                if (a == b || rand() < dropProb)
+                    continue;
+                end
+                x1 = nodeA.x;
+                y1 = nodeA.y;
+                x2 = nodeB.x;
+                y2 = nodeB.y;
+                dist = sqrt((x2 - x1) .^2 + (y2 - y1) .^2);
+                
+                % Factor in range fluctuation using a normal dist
+                % rangeOffset = normrnd(0,rangeSd);
+                rangeOffset = randn(1) * rangeSd + 0;
+                if (dist > range + rangeOffset)
+                    continue;
+                end
+                
+                % distOffset = normrnd(0,distSd);
+                distOffset = randn(1) * distSd + 0;
+                distVal = dist+distOffset;
+                
+                if (distVal - dist > maxErr)
+                    distVal = dist + maxErr;
+                elseif (distVal - dist < -maxErr)
+                    distVal = dist - maxErr;
+                end
+                
+                % Write to the file
+                fprintf(fdat,'%d,%d,%d\n',a,b,distVal);
+                
+                % Update the loading bar
+                uiwaitbar(external.wBar,count/(numEl*(numEl-1)),'set');
+                count = count + 1;
+            end
+        end
+        
+        fclose(fdat);
+        uiwaitbar(external.wBar,1,'set')
     end
     
-    fclose(fdat);
     
-    uiwaitbar(external.wBar,1,'set')
     
     % NodeA,NodeB,Distance
     
