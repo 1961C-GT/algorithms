@@ -608,7 +608,7 @@ function generateMeasurements(~,~,external)
     
     path = uigetdir(external.storePath, 'Output Location');
     if (path ~= 0)
-        
+        path = [path '/'];
         x = external.ax1.Children(1).XData;
         y = external.ax1.Children(1).YData;
         range = str2num(get(external.s3,'String'));
