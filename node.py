@@ -1,7 +1,7 @@
 import uuid
 import random
 from measurement import Measurement
-from algorithms.algorithm import Vector2
+from algorithms.algorithm import Vector2, Distance
 from tkinter import font, Canvas
 import tkinter as tk
 
@@ -22,6 +22,7 @@ class Node:
         self.real_y = y  # random.randint(25, 600)
         self.real_obj = None
         self.guess_obj = None
+        self.cleared = False
         if is_base:
             self.x = x
             self.y = y
@@ -103,6 +104,8 @@ class Node:
         if(self.x is None or self.y is None or self.is_base is True):
             return
         fill = "white"
+        if Distance(self.get_real_position_vec(), self.get_position_vec()) < 20:
+            fill = "green"
         size = 10
         obj = canvas.create_circle(
             self.x, self.y, size, fill=fill, outline="", tags=['node'])
@@ -123,6 +126,8 @@ class Node:
         if(self.real_x is None or self.real_y is None):
             return
         fill = "#373B41"
+        if not self.is_base and Distance(self.get_real_position_vec(), self.get_position_vec()) < 20:
+            return
         size = 10
         if self.is_base:
             fill = "orange"
@@ -150,6 +155,13 @@ class Node:
 
     def clear_measurements(self):
         self.measurements = []
+
+    def getAsString(self):
+        if self.x is not None and self.y is not None:
+            str1 = "{name} ({id}) -> x: ".format(name=self.name, id=self.id)
+            return str1 + "{:.3f}, y: {:.3f}".format(self.x, self.y)
+        else:
+            return str(self)
 
     def __str__(self):
         if self.name != "":

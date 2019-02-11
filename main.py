@@ -214,6 +214,12 @@ def _connect_nodes_guess(self, node1, node2, text=None, dashed=True, color="#3c4
     self.connect_nodes(node1_pos, node2_pos, text=text, dashed=dashed, color=color)
 tk.Canvas.connect_nodes_guess = _connect_nodes_guess
 
+
+def _connect_node_and_pos(self, node1, pos, text=None, dashed=True, color="#3c4048"):
+    node1_pos = node1.get_position()
+    self.connect_nodes(node1_pos, pos, text=text, dashed=dashed, color=color)
+tk.Canvas.connect_node_and_pos = _connect_node_and_pos
+
 def _circle_node(self, node_pos, radius, text, dashed, fill, outline):
     if node_pos[0] is None or node_pos[1] is None:
         return
@@ -239,6 +245,11 @@ def _circle_node_guess(self, node, radius, text=None, dashed=True, fill="", outl
     node_pos = node.get_position()
     self.circle_node(node_pos, radius, text, dashed, fill, outline)
 tk.Canvas.circle_node_guess = _circle_node_guess
+
+
+def _circle_position(self, position, radius, text=None, dashed=True, fill="", outline="red"):
+    self.circle_node(position, radius, text, dashed, fill, outline)
+tk.Canvas.circle_position = _circle_position
 
 def _circle_area(self, x, y, radius, text=None, dashed=True, fill="", outline="red"):
     self.circle_node((x,y), radius, text, dashed, fill, outline)

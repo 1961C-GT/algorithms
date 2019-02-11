@@ -60,6 +60,12 @@ class Algorithm:
         return self.__class__.__name__
 
 
+def Distance(P0, P1):
+    if P0.x is None or P0.y is None or P1.x is None or P1.y is None:
+        return math.inf
+    offset = P1 - P0
+    return offset.magnitude()
+
 # Determines whether two circles collide and, if applicable,
 # the points at which their borders intersect.
 # Based on an algorithm described by Paul Bourke:
