@@ -1,6 +1,6 @@
 function external = run (varargin)
     close all;
-    
+    rng(7)
     % Add all of the lib items to the path
     addpath(genpath('./'));
     
@@ -606,7 +606,7 @@ function generateMeasurements(~,~,external)
     
     uiwaitbar(external.wBar,0,'set');
     
-    path = uigetdir(external.storePath, 'Output Location');
+    path = external.storePath; %uigetdir(external.storePath, 'Output Location');
     if (path ~= 0)
         path = [path '/'];
         x = external.ax1.Children(1).XData;
@@ -631,10 +631,10 @@ function generateMeasurements(~,~,external)
         fdat = fopen([path get(external.i4,'String') '.dat'],'w');
         fprintf(fdat,'NodeA,NodeA,Distance\n');
         
-        distSd = external.s6.Value;
-        rangeSd = external.s7.Value;
-        maxErr = external.s8.Value;
-        dropProb = external.s9.Value;
+        distSd = str2num(external.s6.String);
+        rangeSd = str2num(external.s7.String);
+        maxErr = str2num(external.s8.String);
+        dropProb = str2num(external.s9.String);
         
         count = 1;
         for a = 1:1:numEl
@@ -658,8 +658,8 @@ function generateMeasurements(~,~,external)
                 end
                 
                 % distOffset = normrnd(0,distSd);
-                distOffset = randn(1) * distSd + 0;
-                distVal = dist+distOffset;
+                distOffset = randn(1) + 0;
+                distVal = dist+dist*distOffset*distSd/1000;
                 
                 if (distVal - dist > maxErr)
                     distVal = dist + maxErr;

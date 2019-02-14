@@ -61,6 +61,16 @@ class DirectTriangulation:
         for guess in self.guess_list:
             canvas.circle_position((guess.x, guess.y), 15, text=self.title, dashed=False, fill="red")
 
+    def displayTriangulation(self, canvas, resolved_position):
+        canvas.connect_nodes(resolved_position, (self.res1.x, self.res1.y), color="#6b92a7")
+        canvas.connect_nodes(resolved_position, (self.res2.x, self.res2.y), color="#6b92a7")
+        # for guess in self.guess_list:
+        #     canvas.connect_nodes((guess.x, guess.y),
+        #                          (self.res1.x, self.res1.y), color="#383c49")
+        #     canvas.connect_nodes((guess.x, guess.y),
+        #                          (self.res2.x, self.res2.y), color="#383c49")
+
+
 
 class Cluster:
     def __init__(self, title=None):
@@ -114,9 +124,15 @@ class Cluster:
         return self.radius
         
     # Display the cluster on the UI
-    def display(self, canvas):
+    def display(self, canvas, ghost=False):
         if self.pure is False:
             self.getRadius()
         for p in self._points:
-            canvas.circle_area(p.x, p.y, 2, dashed=False, outline="", fill="red")
-        canvas.circle_area(self.center.x, self.center.y, self.radius, outline="#375772", text=self.title)
+            if ghost is False:
+                canvas.circle_area(p.x, p.y, 2, dashed=False, outline="", fill="red")
+            else:
+                canvas.circle_area(p.x, p.y, 2, dashed=False, outline="", fill="#4678a1")
+        if ghost is False:
+            canvas.circle_area(self.center.x, self.center.y, self.radius, outline="#375772", text=self.title)
+        else:
+            canvas.circle_area(self.center.x, self.center.y, self.radius, outline="#383c49", text=self.title)

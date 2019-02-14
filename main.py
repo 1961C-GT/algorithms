@@ -308,6 +308,8 @@ def render(nodes, time_taken, note):
     canvas.create_text(width/2-50, height - 20, text=f"{l1}\n{l2}\n",fill="white", font=font.Font(family='Courier New', size=14),
         justify=tk.RIGHT)
     shrink(width/area_width, x=0, y=0)
+    move(-100,-30)
+    zoom(1.5, center=True)
     root.mainloop()
 
 

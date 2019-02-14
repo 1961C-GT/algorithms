@@ -15,7 +15,7 @@ class multi_tri(Algorithm):
         self.resolved_nodes = [nodes['1'], nodes['2']]  # Known
 
         self.config = {
-            'max_cluster_radius': 20
+            'max_cluster_radius': 105
         }
 
     def process(self, callback, canvas):
@@ -155,6 +155,7 @@ class multi_tri(Algorithm):
                     loc = dts[0].getGuesses()[0]
                     node.set_position_vec(loc)
                     self.resolved_nodes.append(node)
+                    node.displayTriangulations(canvas)
                 elif case2:
                     # Step 5.1) Loop through triangulations and generate
                     #           clusters
@@ -181,20 +182,20 @@ class multi_tri(Algorithm):
                     for cluster in clusters:
                         radius = cluster.getRadius()
                         # Record the smallest cluster radius
+                        cluster.display(canvas, ghost=True)
                         if radius < smallest_radius:
                             smallest_radius = radius
                             best_cluster = cluster
                     
-                    # print('radius:')
-                    # print(best_cluster.getRadius())
-
-                    # best_cluster.title = str(counter) + ' best'
-                    # best_cluster.display(canvas)
                     if best_cluster is not None and best_cluster.getRadius() <= self.config['max_cluster_radius']:
                         # Resolved!!
+                        best_cluster.display(canvas)
                         loc = best_cluster.getCenter()
+                        for point in best_cluster.getPoints():
+                            canvas.connect_nodes((loc.x, loc.y), (point.x, point.y))
                         node.set_position_vec(loc)
                         self.resolved_nodes.append(node)
+                        node.displayTriangulations(canvas)
 
                 else:
                     # JUMP TO ~5
@@ -207,6 +208,12 @@ class multi_tri(Algorithm):
                 resolving = False
             counter += 1
         # Done!
+
+        print("")
+        print(('--- Results ').ljust(60, '-'))
+        for key, value in self.nodes.items():
+            value.printReport()
+
         callback(render=True)
 
     ################################ Steps ################################

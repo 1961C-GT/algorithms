@@ -50,6 +50,10 @@ class Node:
     def getTriangulations(self):
         return self.triangulate_list
 
+    def displayTriangulations(self, canvas):
+        for dt in self.triangulate_list:
+            dt.displayTriangulation(canvas, (self.x, self.y))
+
     def set_position_vec(self, pos):
         self.x = pos.x
         self.y = pos.y
@@ -131,7 +135,7 @@ class Node:
             canvas.tag_raise(obj)
             canvas.tag_raise(self.real_obj)
         self.guess_obj = obj
-        self.__class__.node_arr[obj] = 'Guess: ' + str(self)
+        self.__class__.node_arr[obj] = str(self) + ' : ' + self.errorToStr()
         canvas.tag_bind(obj, '<Enter>', self.__class__.nodeEnter)
         canvas.tag_bind(obj, '<Leave>', self.__class__.nodeLeave)
 
@@ -159,6 +163,15 @@ class Node:
         self.__class__.node_arr[obj] = 'Real: ' + str(self)
         canvas.tag_bind(obj, '<Enter>', self.__class__.nodeEnter)
         canvas.tag_bind(obj, '<Leave>', self.__class__.nodeLeave)
+
+    def errorToStr(self):
+        offset = self.get_position_vec() - self.get_real_position_vec()
+        d = offset.magnitude()
+        return "{:.3f}ft".format(d)
+
+    def printReport(self):
+        
+        print(str(self), " : ", self.errorToStr())
 
     def get_measurement(self, node_id):
         return next(filter(lambda m: m.node2.id == node_id, self.measurements))
