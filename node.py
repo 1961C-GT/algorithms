@@ -165,13 +165,16 @@ class Node:
         canvas.tag_bind(obj, '<Leave>', self.__class__.nodeLeave)
 
     def errorToStr(self):
-        offset = self.get_position_vec() - self.get_real_position_vec()
-        d = offset.magnitude()
-        return "{:.3f}ft".format(d)
+        if self.x is not None and self.y is not None:
+            offset = self.get_position_vec() - self.get_real_position_vec()
+            d = offset.magnitude()
+            return "{:.3f}ft".format(d)
+        else:
+            return "Unresolved"
 
     def printReport(self):
-        
-        print(str(self), " : ", self.errorToStr())
+        if self.x is not None and self.y is not None:
+            print(str(self), " : ", self.errorToStr() + ' error')
 
     def get_measurement(self, node_id):
         return next(filter(lambda m: m.node2.id == node_id, self.measurements))

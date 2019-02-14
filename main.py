@@ -8,6 +8,7 @@ import csv
 import tkinter as tk
 from tkinter import font
 from tkinter import *
+from canvasvg import *
 
 from node import Node
 from measurement import Measurement
@@ -237,13 +238,13 @@ def _circle_node(self, node_pos, radius, text, dashed, fill, outline):
 tk.Canvas.circle_node = _circle_node
 
 def _circle_node_real(self, node, radius, text=None, dashed=True, fill="", outline="red"):
-    node_pos = node.get_real_position()
-    self.circle_node(node_pos, radius, text, dashed, fill, outline)
+    node_pos = node.get_real_position_vec()
+    self.circle_node((node_pos.x, node_pos.y), radius, text, dashed, fill, outline)
 tk.Canvas.circle_node_real = _circle_node_real
 
 def _circle_node_guess(self, node, radius, text=None, dashed=True, fill="", outline="red"):
-    node_pos = node.get_position()
-    self.circle_node(node_pos, radius, text, dashed, fill, outline)
+    node_pos = node.get_position_vec()
+    self.circle_node((node_pos.x, node_pos.y), radius, text, dashed, fill, outline)
 tk.Canvas.circle_node_guess = _circle_node_guess
 
 
@@ -310,6 +311,12 @@ def render(nodes, time_taken, note):
     shrink(width/area_width, x=0, y=0)
     move(-100,-30)
     zoom(1.5, center=True)
+
+    d = SVGdocument()
+    convert(d, canvas)
+    saveall(f'{alg_name}-render.svg', canvas)
+
+
     root.mainloop()
 
 
