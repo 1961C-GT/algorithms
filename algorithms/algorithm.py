@@ -92,11 +92,11 @@ def Intersection(P0, P1, r0, r1):
   # equation 2: simple cases
   if d > (r0 + r1):
     # no collision
-    return False
+    return [None, None]
   elif d == 0 or d < abs(r0 - r1):
     # full containment
-    return True
-
+    return [None, None]
+    
   # equation 3
   a = (r0**2 - r1**2 + d**2) / (2 * d)
 
@@ -108,7 +108,7 @@ def Intersection(P0, P1, r0, r1):
 
   # equation 6
   if (d == r0 + r1):
-    return [P2]
+    return [P2, None]
 
   # equation 8
   alpha_x = P2.x + h * (P1.y - P0.y) / d

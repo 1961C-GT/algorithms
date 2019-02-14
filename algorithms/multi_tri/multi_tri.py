@@ -14,6 +14,10 @@ class multi_tri(Algorithm):
         self.measure_list = []
         self.resolved_nodes = [nodes['1'], nodes['2']]  # Known
 
+        self.config = {
+            'max_cluster_radius': 20
+        }
+
     def process(self, callback, canvas):
         ###### Steps:
         # 1) Generate a list of measurements, ensuring that no duplicates
@@ -59,42 +63,149 @@ class multi_tri(Algorithm):
         # 9) Done!
 
 
-        clust = Cluster(title="Test!")
-        clust.addPoints([Vector2(0, 0), Vector2(500, 100), Vector2(0, 200)])
-        clust.display(canvas)
+        # clust = Cluster(title="Test!")
+        # clust.addPoints([Vector2(0, 0), Vector2(500, 100), Vector2(0, 200)])
+        # clust.display(canvas)
 
         self.reduceMeasureList()  # Step 1 / Step 3?
         self.applyRawConfidence()  # Step2
 
-        self.printList(self.resolved_nodes, title='Resolved Nodes', verbose=True)
         self.printList(self.measure_list, title='Current Meas')
-
 
         # Loop coordination for step 4
         resolving = True
         old_resolved_length = 0
+        counter = 0
         while resolving is True:
+            print("")
+            print("")
             old_resolved_length = len(self.resolved_nodes)
+            self.printList(self.resolved_nodes,
+                           title='Resolved Nodes '+str(counter+1), verbose=True)
 
             ############# Begin algorithm #############
-
-            
-
-
             # Step 6) Remove measurements where both nodes are resolved
-            for node1 in self.resolved_nodes:
-                for node2 in self.resolved_nodes:
-                    if node1 == node2:
+            self.removeUnusedMeasures()
+
+            # Step 4.1) Get meas for which one node is resolved
+            active_meas_list = []
+            for node in self.resolved_nodes:
+                m = self.getMeasuresUsingNode(node)
+                if m:
+                    active_meas_list += m
+            self.printList(active_meas_list, title=('Measure List '+str(counter+1)))
+
+            # Step 4.2) Get a list of pairs of measurements from the previous
+            #           list for which each measurement orgniates from a
+            #           resolved node and terminates at a single un-resolved node
+            meas_pairs = []
+            unresolved_nodes = []
+            # Loop 0 -> N-1 through the active_meas_list
+            for m1_x in range(len(active_meas_list)-1):
+                m1 = active_meas_list[m1_x]
+                # Also loop x -> N through the active_meas_list
+                for m2_x in range(m1_x+1, len(active_meas_list)):
+                    m2 = active_meas_list[m2_x]
+                    # We now have every set of pairs of measures, unrepeated
+                    # Get the pairs of nodes from the measures
+                    m1_pair = m1.getNodePair()
+                    m2_pair = m2.getNodePair()
+                    # Continue if the pair is invalid (none or both are resolved)
+                    if m1_pair is None or m2_pair is None or m1_pair == False or m2_pair == False:
                         continue
-                    rm = self.getMeasureUsingNodes(node1, node2)
-                    if rm:
-                        self.measure_list.remove(rm)
-                        print('Removed ' + str(rm))
+                    # If the resolved nodes are equal, or the target nodes are different,
+                    # continue
+                    if m1_pair[0] == m2_pair[0] or m1_pair[1] != m2_pair[1]:
+                        continue
+                    # Add the pair to the list
+                    meas_pairs.append((m1, m2))
+                    unresolved_nodes.append(m1_pair[1])
+
+
+            # Step 4.3) Use triangulation to form two guesses, and store them in
+            #           the un-resolved node (using triangulation object)
+            for pair in meas_pairs:
+                # Get measures
+                m1 = pair[0]
+                m2 = pair[1]
+                dt = DirectTriangulation(m1, m2)  # Also removes "world border" guesses
+                dt.triangulate()
+                target = m1.getUnResolvedNode()
+                target.addTriangulation(dt)
+                # print("Target: ", target, "  Guess ct: ", dt.getNumGuesses())
+                # print(str(m1), " and ", str(m2))
+
+                # dt.display(canvas)
+
+            # Step 5) Parse through each un-resolved node to resolve position (Need either
+            #         1 direct triangulation object with a single guess, or greater than 1
+            #         direct triangulation object. If not the case, jump to ~5)
+            for node in unresolved_nodes:
+                # Skip nodes that we just resolved
+                if node in self.resolved_nodes:
+                    continue
+                # print(node)
+                dts = node.getTriangulations()
+                # 1 direct triangulation object with 1 guess only
+                case1 = len(dts) == 1 and dts[0].getNumGuesses() == 1
+                # More than 1 direct triangulation object
+                case2 = len(dts) > 1
+                # print(case1, "  ", case2)
+                if case1:  # Resolvable, assign and move on
+                    loc = dts[0].getGuesses()[0]
+                    node.set_position_vec(loc)
+                    self.resolved_nodes.append(node)
+                elif case2:
+                    # Step 5.1) Loop through triangulations and generate
+                    #           clusters
+                    clusters = []
+                    key_dt = dts[0]
+                    # Loop through each key guess
+                    for guess in key_dt.getGuesses():
+                        # Loop through other triangulations
+                        cluster = Cluster()
+                        cluster.addPoint(guess)
+                        for x in range(1, len(dts)):
+                            # Add the cloest guess from each other triangulation)
+                            guess_point = dts[x].getClosestGuess(guess)[0]
+                            if guess_point is not None:
+                                cluster.addPoint(guess_point)
+                        # If we have more than one guess, the cluster is valid
+                        if cluster.getNumPoints() > 1:
+                            clusters.append(cluster)
+
+                    # Step 5.2-5.5 Resolution based on cluster
+                    smallest_radius = math.inf
+                    best_cluster = None
+                    # Loop through clusters to find best one
+                    for cluster in clusters:
+                        radius = cluster.getRadius()
+                        # Record the smallest cluster radius
+                        if radius < smallest_radius:
+                            smallest_radius = radius
+                            best_cluster = cluster
+                    
+                    # print('radius:')
+                    # print(best_cluster.getRadius())
+
+                    # best_cluster.title = str(counter) + ' best'
+                    # best_cluster.display(canvas)
+                    if best_cluster is not None and best_cluster.getRadius() <= self.config['max_cluster_radius']:
+                        # Resolved!!
+                        loc = best_cluster.getCenter()
+                        node.set_position_vec(loc)
+                        self.resolved_nodes.append(node)
+
+                else:
+                    # JUMP TO ~5
+                    pass
+
             ###########################################
 
             # Loop coordination
             if len(self.resolved_nodes) == old_resolved_length:
                 resolving = False
+            counter += 1
         # Done!
         callback(render=True)
 
@@ -189,3 +300,13 @@ class multi_tri(Algorithm):
         else:
              return out
 
+    # Remove measures that are between two nodes in the resolved_nodes list
+    def removeUnusedMeasures(self):
+        for node1 in self.resolved_nodes:
+            for node2 in self.resolved_nodes:
+                if node1 == node2:
+                    continue
+                rm = self.getMeasureUsingNodes(node1, node2)
+                if rm:
+                    self.measure_list.remove(rm)
+                    print('Removed ' + str(rm))

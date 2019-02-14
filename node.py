@@ -22,10 +22,12 @@ class Node:
         self.real_y = y  # random.randint(25, 600)
         self.real_obj = None
         self.guess_obj = None
-        self.cleared = False
+        self.resolved = False
+        self.triangulate_list = []
         if is_base:
             self.x = x
             self.y = y
+            self.resolved = True
         else:
             self.x = None
             self.y = None
@@ -33,14 +35,25 @@ class Node:
 
     def add_measurement(self, node_b, dist):
         self.measurements.append(Measurement(self, node_b, dist))
+    
+    def isResolved(self):
+        return self.resolved
 
     def set_position(self, x, y):
         self.x = x
         self.y = y
+        self.resolved = True
+
+    def addTriangulation(self, tri):
+        self.triangulate_list.append(tri)
+
+    def getTriangulations(self):
+        return self.triangulate_list
 
     def set_position_vec(self, pos):
         self.x = pos.x
         self.y = pos.y
+        self.resolved = True
 
     def get_position(self):
         return (self.x, self.y)

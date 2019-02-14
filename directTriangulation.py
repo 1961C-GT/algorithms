@@ -5,20 +5,30 @@ import math
 import numpy as np
 
 class DirectTriangulation:
-    def __init__(self, meas1, meas2, res1, res2):
+    def __init__(self, meas1, meas2, res1=None, res2=None, title=None):
         self.meas1 = meas1
         self.meas2 = meas2
         self.res1 = res1
         self.res2 = res2
+        self.title = title
+        if self.res1 is None:
+            self.res1 = self.meas1.getResolvedNode()
+        if self.res2 is None:
+            self.res2 = self.meas2.getResolvedNode()
+        if self.res1 is None or self.res1 == False or self.res2 is None or self.res2 == False:
+            error("Both measurments require a resolved node, or resolved nodes must be provided.")
+            return
         self.guess_list = []
 
     # Triangulate two guesses from the provided measurements
     def triangulate(self):
         if self.meas1 is not None and self.meas2 is not None and self.res1 is not None and self.res2 is not None:
-            (P0, P1) = Intersection(res1.get_position_vec(), res2.get_position_vec(), meas1.dist, meas2.dist)
-            self.guess_list.append(P0)
-            self.guess_list.append(P1)
-            # TODO: Remove the guess that is outside the world border
+            (P0, P1) = Intersection(self.res1.get_position_vec(), self.res2.get_position_vec(), self.meas1.dist, self.meas2.dist)
+            # TODO: Remove the guess that is outside the world border / make it better
+            if P0 is not None and P0.y > 100:
+                self.guess_list.append(P0)
+            if P1 is not None and P1.y > 100:
+                self.guess_list.append(P1)
 
     # Directly add a guess to the guess list, without triangulating it
     def directlyAddGuess(self, guess):
@@ -45,7 +55,11 @@ class DirectTriangulation:
                     return_guess = guess
             return (return_guess, short_dist)
         else:
-            return False
+            return (None, None)
+        
+    def display(self, canvas):
+        for guess in self.guess_list:
+            canvas.circle_position((guess.x, guess.y), 15, text=self.title, dashed=False, fill="red")
 
 
 class Cluster:
@@ -68,6 +82,10 @@ class Cluster:
     # Get the points from the cluster
     def getPoints(self):
         return self._points
+
+    # Get the number of points in the cluster
+    def getNumPoints(self):
+        return len(self._points)
 
     # Get the center of the cluster
     def getCenter(self):
