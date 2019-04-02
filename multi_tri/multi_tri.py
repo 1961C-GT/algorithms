@@ -1,11 +1,9 @@
 from algorithms.algorithm import Algorithm
-from algorithms.algorithm import Vector2
-from algorithms.algorithm import Intersection
-from directTriangulation import DirectTriangulation, Cluster
+from algorithms.helpers.direct_triangulation import DirectTriangulation, Cluster
 import math
 
 
-# > python3 main.py random example_alg
+# > python3 main.py random multi_tri
 
 
 class multi_tri(Algorithm):

@@ -3,7 +3,7 @@ from scipy.optimize import minimize
 from scipy.spatial.distance import pdist
 import math
 
-# > python3 main.py <data set> drct_trng
+# > python3 main.py <data set> direct_tri
 
 # Implementation of https://www.alanzucconi.com/2017/03/13/positioning-and-trilateration/
 
@@ -18,7 +18,7 @@ def mse(x, base_nodes, node_id):
     return mse / len(base_nodes)
 
 
-class drct_trng(Algorithm):
+class direct_tri(Algorithm):
     def __init__(self, nodes):
         super().__init__(nodes)
 
@@ -30,8 +30,8 @@ class drct_trng(Algorithm):
 
         n1 = [m.node2 for m in base_nodes[0].get_measurements()]
         n2 = [m.node2 for m in base_nodes[1].get_measurements()]
-        drct_trng_nodes = set(n1).intersection(n2)
-        for n in drct_trng_nodes:
+        direct_tri_nodes = set(n1).intersection(n2)
+        for n in direct_tri_nodes:
             print("DT node: {n}".format(n=n))
             result = minimize(
                 mse,                        # The error function
