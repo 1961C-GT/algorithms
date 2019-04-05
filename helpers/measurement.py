@@ -44,5 +44,18 @@ class Measurement:
     def is_resolved(self):
         return self.node1.is_resolved() and self.node2.is_resolved()
 
+    def avg_with_history(self, history):
+        m = [self.dist]
+        for measurements in history:
+            for measurement in measurements:
+                if self == measurement:
+                    m.append(measurement.dist)
+        nm = Measurement(self.node1, self.node2, sum(m) / len(m))
+        nm.opinions = self.opinions
+        return nm
+
     def __str__(self):
         return '{:12s} ->  {:12s}: {:.3f} . {:.3f}'.format(str(self.node1), str(self.node2), self.dist, self.confidence)
+
+    def __eq__(self, other):
+        return self.node1 == other.node1 and self.node2 == other.node2
