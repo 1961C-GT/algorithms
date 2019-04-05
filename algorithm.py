@@ -4,10 +4,8 @@ import builtins as __builtin__
 
 
 class Algorithm:
-
-    time_only = True
-
     old_print = print
+    time_only = True
 
     def __init__(self, nodes):
         self.nodes = nodes
@@ -22,14 +20,14 @@ class Algorithm:
         # is probably a bad idea.
         # Instead consider testing if custom argument keywords
         # are present in kwargs
-        t = '{0:.2f}'.format((time.time() - __class__.__stime__)*1000)
+        t = '{0:.2f}'.format((time.time() - __class__.__stime__) * 1000)
         if __class__.time_only is True:
             __class__.old_print('{:14s}'.format(f'[{t}ms] '), end='')
         else:
             __class__.old_print('{:30s}'.format(f'[{__class__.__cname__} | {t}ms] '), end='')
         return __class__.old_print(*args, **kwargs)
 
-    def _process(self, callback, canvas):
+    def _process(self, callback):
         global print
         self._callback = callback
         print(
@@ -41,7 +39,7 @@ class Algorithm:
         __builtin__.print = self.__class__.class_print
         self.start = time.time()
         __class__.__stime__ = self.start
-        self.process(self._run_callback, canvas)
+        self.process(self._run_callback)
 
     def _run_callback(self, render=True):
         global print
@@ -49,7 +47,7 @@ class Algorithm:
         __builtin__.print = self.__class__.old_print
         print(
             '##########################################################################\n')
-        print("Algorithm time: %.2fms" % ((self.end - self.start)*1000))
+        print("Algorithm time: %.2fms" % ((self.end - self.start) * 1000))
         if render is True:
             self._callback(self.nodes, self.end - self.start, self.note)
 
@@ -60,11 +58,12 @@ class Algorithm:
         return self.__class__.__name__
 
 
-def Distance(P0, P1):
-    if P0.x is None or P0.y is None or P1.x is None or P1.y is None:
+def get_distance(p0, p1):
+    if p0.x is None or p0.y is None or p1.x is None or p1.y is None:
         return math.inf
-    offset = P1 - P0
+    offset = p1 - p0
     return offset.magnitude()
+
 
 # Determines whether two circles collide and, if applicable,
 # the points at which their borders intersect.
@@ -81,46 +80,46 @@ def Distance(P0, P1):
 #       do not overlap, or overlap exactly (e.g. two identical circles)
 #   An array of two vectors containing the intersection points
 #       if the circle's borders intersect.
-def Intersection(P0, P1, r0, r1):
-  if type(P0) != Vector2 or type(P1) != Vector2:
-    raise TypeError("P0 and P1 must be vectors")
+def get_intersections(p0, p1, r0, r1):
+    if type(p0) != Vector2 or type(p1) != Vector2:
+        raise TypeError("p0 and p1 must be vectors")
 
-  # equation 1
-  offset = P1 - P0
-  d = offset.magnitude()
+    # equation 1
+    offset = p1 - p0
+    d = offset.magnitude()
 
-  # equation 2: simple cases
-  if d > (r0 + r1):
-    # no collision
-    return [None, None]
-  elif d == 0 or d < abs(r0 - r1):
-    # full containment
-    return [None, None]
-    
-  # equation 3
-  a = (r0**2 - r1**2 + d**2) / (2 * d)
+    # equation 2: simple cases
+    if d > (r0 + r1):
+        # no collision
+        return [None, None]
+    elif d == 0 or d < abs(r0 - r1):
+        # full containment
+        return [None, None]
 
-  # equation 4
-  h = math.sqrt(r0**2 - a**2)
+    # equation 3
+    a = (r0 ** 2 - r1 ** 2 + d ** 2) / (2 * d)
 
-  # equation 5
-  P2 = P0 + a * (P1 - P0) / d
+    # equation 4
+    h = math.sqrt(r0 ** 2 - a ** 2)
 
-  # equation 6
-  if (d == r0 + r1):
-    return [P2, None]
+    # equation 5
+    p2 = p0 + a * (p1 - p0) / d
 
-  # equation 8
-  alpha_x = P2.x + h * (P1.y - P0.y) / d
-  alpha_y = P2.y - h * (P1.x - P0.x) / d
-  alpha = Vector2(alpha_x, alpha_y)
+    # equation 6
+    if d == r0 + r1:
+        return [p2, None]
 
-  # equation 9
-  beta_x = P2.x - h * (P1.y - P0.y) / d
-  beta_y = P2.y + h * (P1.x - P0.x) / d
-  beta = Vector2(beta_x, beta_y)
+    # equation 8
+    alpha_x = p2.x + h * (p1.y - p0.y) / d
+    alpha_y = p2.y - h * (p1.x - p0.x) / d
+    alpha = Vector2(alpha_x, alpha_y)
 
-  return [alpha, beta]
+    # equation 9
+    beta_x = p2.x - h * (p1.y - p0.y) / d
+    beta_y = p2.y + h * (p1.x - p0.x) / d
+    beta = Vector2(beta_x, beta_y)
+
+    return [alpha, beta]
 
 
 # Simple 2D vector class.
@@ -134,44 +133,31 @@ class Vector2(object):
 
     def magnitude(self):
         """Returns the magnitude of this vector."""
-        return math.sqrt(self.x**2 + self.y**2)
+        return math.sqrt(self.x ** 2 + self.y ** 2)
 
     def __add__(self, other):
         """Returns the vector addition of self and other."""
-        newx = self.x + other.x
-        newy = self.y + other.y
-        return Vector2(newx, newy)
+        return Vector2(self.x + other.x, self.y + other.y)
 
     def __sub__(self, other):
         """Returns the vector difference of self and other."""
-        newx = self.x - other.x
-        newy = self.y - other.y
-        return Vector2(newx, newy)
+        return Vector2(self.x - other.x, self.y - other.y)
 
     def __mul__(self, other):
         """Multiplies each component if other is a scalar"""
-        if type (other) == type(1) or type(other) == type(1.0):
-            return Vector2(self.x * other, self.y * other)
-        else:
-            raise NotImplementedError
+        return Vector2(self.x * other, self.y * other)
 
     def __rmul__(self, other):
         return self.__mul__(other)
 
     def __floordiv__(self, other):
         """Divides each component if other is a scalar"""
-        if type (other) == type(1):
-            return Vector2(self.x / other, self.y / other)
-        else:
-            raise NotImplementedError
+        return Vector2(self.x / other, self.y / other)
 
     def __truediv__(self, other):
         """Divides each component if other is a scalar"""
-        if type(other) == type(1.0):
-            return Vector2(self.x / other, self.y / other)
-        else:
-            raise NotImplementedError
+        return Vector2(self.x / other, self.y / other)
 
     def __str__(self):
         """Returns this vector as a string of the form: (x, y)"""
-        return "(%(x)d, %(y)d)" % { "x": self.x, "y": self.y }
+        return "(%(x)d, %(y)d)" % {"x": self.x, "y": self.y}
