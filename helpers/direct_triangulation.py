@@ -4,12 +4,13 @@ import math
 
 
 class DirectTriangulation:
-    def __init__(self, meas1, meas2, res1=None, res2=None, title=None):
+    def __init__(self, meas1, meas2, res1=None, res2=None, title=None, multi_pipe=None):
         self.meas1 = meas1
         self.meas2 = meas2
         self.res1 = res1
         self.res2 = res2
         self.title = title
+        self.multi_pipe = multi_pipe
         if self.res1 is None:
             self.res1 = self.meas1.get_resolved_node()
         if self.res2 is None:
@@ -59,12 +60,13 @@ class DirectTriangulation:
 
 
 class Cluster:
-    def __init__(self, title=None):
+    def __init__(self, title=None, multi_pipe=None):
         self._points = []
         self.center = None
         self.radius = None
         self.pure = False
         self.title = title
+        self.multi_pipe = multi_pipe
 
     # Add a point to the cluster
     def add_point(self, point):

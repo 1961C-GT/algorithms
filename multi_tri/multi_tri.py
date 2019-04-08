@@ -2,6 +2,7 @@ from algorithms.algorithm import Algorithm
 from algorithms.helpers.measurement import Measurement
 from algorithms.helpers.direct_triangulation import DirectTriangulation, Cluster
 import math
+import time
 
 
 # > python3 main.py random multi_tri
@@ -18,7 +19,7 @@ class multi_tri(Algorithm):
             'min_guess_isolation': 250
         }
 
-    def process(self, callback):
+    def process(self, callback, multi_pipe=None):
         ###### Steps:
         # 1) Generate a list of measurements, ensuring that no duplicates
         #    exist. If they do, average the values.
@@ -67,8 +68,17 @@ class multi_tri(Algorithm):
 
         self.reduce_measure_list()  # Step 1 / Step 3?
         self.apply_raw_confidence()  # Step2
-
         self.print_list(self.measure_list, title='Current Meas')
+
+        self.piping = False
+        self.multi_pipe = multi_pipe
+        if self.multi_pipe is not None:
+            self.piping = True
+            # self.send_pipe_msg({
+            #     "cmd": "clear_screen",
+            #     "args": None
+            # })
+            time.sleep(0.1)
 
         # Loop coordination for step 4
         guessing = True
@@ -127,7 +137,7 @@ class multi_tri(Algorithm):
                     # Get measures
                     m1 = pair[0]
                     m2 = pair[1]
-                    dt = DirectTriangulation(m1, m2)  # Also removes "world border" guesses
+                    dt = DirectTriangulation(m1, m2, multi_pipe=self.multi_pipe)  # Also removes "world border" guesses
                     dt.triangulate()
                     target = m1.get_unresolved_node()
                     target.add_triangulation(dt)
@@ -330,6 +340,10 @@ class multi_tri(Algorithm):
                 m.confidence *= 1.1
 
     ############################### Helpers ###############################
+
+    def send_pipe_msg(self, msg):
+        if self.piping:
+            self.multi_pipe.send(msg)
 
     # Print the any list with style
     @staticmethod
