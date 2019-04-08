@@ -97,8 +97,14 @@ class Node:
     def get_measurement(self, node_id):
         return next(filter(lambda m: m.node2.id == node_id, self.measurements))
 
-    def get_measurements(self):
-        return self.measurements
+    def get_measurements(self, history_avg=True):
+        if history_avg:
+            m = []
+            for measurement in self.measurements:
+                m.append(measurement.avg_with_history(self.measurement_history))
+            return m
+        else:
+            return self.measurements
 
     def clear_measurements(self):
         self.measurements = []
@@ -152,3 +158,6 @@ class Node:
             return "{name} ({id})".format(name=self.name, id=self.id)
         else:
             return str(self.id)
+
+    def __eq__(self, other):
+        return self.id == other.id
