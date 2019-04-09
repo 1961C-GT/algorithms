@@ -8,6 +8,8 @@ class Node:
     node_arr = {}
     min_dist = 500    # mm
     max_dist = 1000000 # mm
+    max_history = 10
+    max_move_per_cycle = 5000
 
     def __init__(self, node_id=None, name=None, is_base=False, x=None, y=None, multi_pipe=None):
         if node_id is None:
@@ -20,9 +22,12 @@ class Node:
         self.real_x = x  # random.randint(25, 600)
         self.real_y = y  # random.randint(25, 600)
         self.resolved = False
+        self.extrapolate = False
         self.triangulate_list = []
         self.multi_pipe = multi_pipe
         self.communicate_list = []
+        self.position_history = []
+        self.added_position = False
         if self.multi_pipe is not None:
             self.piping = True
         else:
@@ -60,18 +65,25 @@ class Node:
             self.x = None
             self.y = None
             self.resolved = False
+        self.extrapolate = False
+
+        if self.added_position is False:
+            if len(self.position_history) > 0:
+                self.position_history.pop(0)
+
+        self.added_position = False
         # if self.measurements:
         #     self.measurement_history.append(self.measurements)
         # if len(self.measurement_history) > config.MAX_HISTORY:
         #     self.measurement_history.pop(0)
         # self.measurements = []
 
-    def add_measurement(self, node_b, dist):
+    def add_measurement(self, node_b, dist, std=None):
         if dist > Node.min_dist and dist < Node.max_dist:
             # print(key)
             # print(self.measurement_history)
             # print(self.measurement_history[key])
-            self.measurements.append(Measurement(self, node_b, dist))
+            self.measurements.append(Measurement(self, node_b, dist, std=std))
             # self.add_to_communicate_list(node_b)
         else:
             # self.measurements.append(Measurement(self, node_b, None))
@@ -89,10 +101,50 @@ class Node:
     def is_resolved(self):
         return self.resolved
 
-    def set_position(self, x, y):
-        self.x = x
-        self.y = y
-        self.resolved = True
+    # def set_position(self, x, y):
+    #     avg = self.get_avg_position()
+    #     cur_pos = Vector2(avg[0], avg[1])
+    #     new_pos = Vector2(x, y)
+    #     offset = cur_pos - new_pos
+    #     d = offset.magnitude()
+    #     if d <= Node.max_move_per_cycle:
+    #         self.x = x
+    #         self.y = y
+    #     else:
+            
+    #         self.x = avg[0]
+    #         self.y = avg[1]
+    #         self.extrapolate = True
+        
+    #     self.resolved = True
+
+    #     self.position_history.append((x, y))
+    #     if len(self.position_history) > Node.max_history:
+    #         self.position_history.pop(0)
+
+    def get_last_position(self):
+        if len(self.position_history) == 0:
+            return None
+        return self.position_history[len(self.position_history)-1]
+    
+    def get_avg_position(self):
+        x_sum = 0
+        y_sum = 0
+        counter = 0
+        for pos in self.position_history:
+            x_sum += pos[0]
+            y_sum += pos[1]
+            counter += 1
+        return (x_sum/counter, y_sum/counter)
+    
+    def get_avg_velocity(self):
+        hist_vec = []
+        for pos in self.position_history:
+            hist_vec.append(Vector2(pos[0], pos[1]))
+        vec_sum = Vector2(0, 0)
+        for pos in hist_vec:
+            vec_sum = vec_sum + pos
+        return vec_sum / len(hist_vec)
 
     def add_triangulation(self, tri):
         self.triangulate_list.append(tri)
@@ -105,8 +157,33 @@ class Node:
             dt.displayTriangulation((self.x, self.y))
 
     def set_position_vec(self, pos):
-        self.x = pos.x
-        self.y = pos.y
+        last = self.get_last_position()
+        if last is None:
+            last_pos = pos
+        else:
+            last_pos = Vector2(last[0], last[1])
+        offset = last_pos - pos
+        d = offset.magnitude()
+
+        # print(d)
+
+        self.position_history.append((pos.x, pos.y))
+        self.added_position = True
+        if len(self.position_history) > Node.max_history:
+            self.position_history.pop(0)
+
+        if d <= Node.max_move_per_cycle:
+            self.x = pos.x
+            self.y = pos.y
+        else:
+            # avg = self.get_avg_position()
+            vel = self.get_avg_velocity()
+            pos = Vector2(last[0], last[1])
+            new_pos = pos + vel
+            self.x = new_pos.x
+            self.y = new_pos.y
+            self.extrapolate = True
+        
         self.resolved = True
 
     def get_position(self):
@@ -189,7 +266,7 @@ class Node:
             "cmd": "draw_circle",
             "args": {
                 "fill": "white",
-                "r": 1,
+                "r": 0.5,
                 "tags": ['node'],
                 "outline": "",
                 "x": self.x,
@@ -199,6 +276,10 @@ class Node:
         }
         if self.is_base:
             cmd_obj['args']['fill'] = "yellow"
+
+        if self.extrapolate:
+            cmd_obj['args']['fill'] = "purple"
+
         self.multi_pipe.send(cmd_obj)
         # obj = canvas.create_circle(
         #     self.x, self.y, size, fill=fill, outline="", tags=['node'])

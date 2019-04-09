@@ -16,9 +16,9 @@ class multi_tri(Algorithm):
         self.resolved_nodes = [nodes['0'], nodes['1']]  # Known
 
         self.config = {
-            'max_cluster_radius': 50,
-            'min_guess_isolation': 250,
-            'min_cluster_difference': 10
+            'max_cluster_radius': 25000, #50,
+            'min_guess_isolation': 72600,
+            'min_cluster_difference': 3000
         }
 
     def process(self, callback, multi_pipe=None):
@@ -72,7 +72,7 @@ class multi_tri(Algorithm):
         self.resolved_nodes = [self.backup_nodes['0'], self.backup_nodes['1']]  # Known
 
         self.reduce_measure_list()  # Step 1 / Step 3?
-        self.apply_raw_confidence()  # Step2
+        # self.apply_raw_confidence()  # Step2
         self.print_list(self.measure_list, title='Current Meas')
 
         self.piping = False
@@ -83,7 +83,7 @@ class multi_tri(Algorithm):
             #     "cmd": "clear_screen",
             #     "args": None
             # })
-            # time.sleep(0.01)
+            
 
         # Loop coordination for step 4
         guessing = True
@@ -393,11 +393,11 @@ class multi_tri(Algorithm):
 
     # Apply basic confidences based on the distance between nodes and the
     # number of original measurements used
-    def apply_raw_confidence(self):
-        for m in self.measure_list:
-            m.confidence = 0.5
-            for x in range(m.opinions - 1):
-                m.confidence *= 1.1
+    # def apply_raw_confidence(self):
+    #     for m in self.measure_list:
+    #         m.confidence = 0.5
+    #         for x in range(m.opinions - 1):
+    #             m.confidence *= 1.1
 
     ############################### Helpers ###############################
 

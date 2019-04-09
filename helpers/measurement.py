@@ -1,17 +1,11 @@
 class Measurement:
-    def __init__(self, node1, node2, dist, err=0):
+    def __init__(self, node1, node2, dist, std=0):
         self.node1 = node1
         self.node2 = node2
         self.dist = dist
-        self.err = err
+        self.std = std
         self.cleared = False
-        self.confidence = 1.0
         self.opinions = 1
-        if self.err == 0 and dist is not None:
-            self.calc_error()
-
-    def calc_error(self):
-        self.err = self.dist * 0.01
 
     def get_resolved_node(self):
         if self.is_resolved():
@@ -44,18 +38,21 @@ class Measurement:
     def is_resolved(self):
         return self.node1.is_resolved() and self.node2.is_resolved()
 
-    def avg_with_history(self, history):
-        m = [self.dist]
-        for measurements in history:
-            for measurement in measurements:
-                if self == measurement:
-                    m.append(measurement.dist)
-        nm = Measurement(self.node1, self.node2, sum(m) / len(m))
-        nm.opinions = self.opinions
-        return nm
+    # def avg_with_history(self, history):
+    #     m = [self.dist]
+    #     for measurements in history:
+    #         for measurement in measurements:
+    #             if self == measurement:
+    #                 m.append(measurement.dist)
+    #     nm = Measurement(self.node1, self.node2, sum(m) / len(m))
+    #     nm.opinions = self.opinions
+    #     return nm
+
+    def get_std(self):
+        return self.std
 
     def __str__(self):
-        return '{:12s} ->  {:12s}: {:.3f} . {:.3f}'.format(str(self.node1), str(self.node2), self.dist, self.confidence)
+        return '{:12s} ->  {:12s}: {:.3f} . {:.3f}'.format(str(self.node1), str(self.node2), self.dist, self.std)
 
     def __eq__(self, other):
         return self.node1 == other.node1 and self.node2 == other.node2
