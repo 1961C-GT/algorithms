@@ -101,7 +101,7 @@ class DirectTriangulation:
                 "pos2":(self.res2.x, self.res2.y),
                 "dashed":True,
                 "color":"#6b92a7",
-                "text": str(round(d1)) + "m",
+                "text": str(round(d2)) + "m",
                 "text_size": 10,
                 "text_color": "#6b92a7"
             }
