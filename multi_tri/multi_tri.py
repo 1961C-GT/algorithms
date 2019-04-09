@@ -12,11 +12,13 @@ class multi_tri(Algorithm):
     def __init__(self, nodes):
         super().__init__(nodes)
         self.measure_list = []
-        self.resolved_nodes = [nodes['1'], nodes['2']]  # Known
+        self.backup_nodes = nodes
+        self.resolved_nodes = [nodes['0'], nodes['1']]  # Known
 
         self.config = {
-            'max_cluster_radius': 105,
-            'min_guess_isolation': 250
+            'max_cluster_radius': 50,
+            'min_guess_isolation': 250,
+            'min_cluster_difference': 10
         }
 
     def process(self, callback, multi_pipe=None):
@@ -66,6 +68,9 @@ class multi_tri(Algorithm):
         # clust.add_points([Vector2(0, 0), Vector2(500, 100), Vector2(0, 200)])
         # clust.display(canvas)
 
+        self.measure_list = []
+        self.resolved_nodes = [self.backup_nodes['0'], self.backup_nodes['1']]  # Known
+
         self.reduce_measure_list()  # Step 1 / Step 3?
         self.apply_raw_confidence()  # Step2
         self.print_list(self.measure_list, title='Current Meas')
@@ -78,7 +83,7 @@ class multi_tri(Algorithm):
             #     "cmd": "clear_screen",
             #     "args": None
             # })
-            time.sleep(0.1)
+            # time.sleep(0.01)
 
         # Loop coordination for step 4
         guessing = True
@@ -134,6 +139,7 @@ class multi_tri(Algorithm):
                 # Step 4.3) Use triangulation to form two guesses, and store them in
                 #           the un-resolved node (using triangulation object)
                 for pair in meas_pairs:
+                    # print(pair)
                     # Get measures
                     m1 = pair[0]
                     m2 = pair[1]
@@ -141,8 +147,7 @@ class multi_tri(Algorithm):
                     dt.triangulate()
                     target = m1.get_unresolved_node()
                     target.add_triangulation(dt)
-
-                    # dt.display(canvas)
+                    # dt.display()
 
                 # Step 5) Parse through each un-resolved node to resolve position (Need either
                 #         1 direct triangulation object with a single guess, or greater than 1
@@ -153,6 +158,7 @@ class multi_tri(Algorithm):
                         continue
                     # print(node)
                     dts = node.get_triangulations()
+                    # print(dts)
                     # 1 direct triangulation object with 1 guess only
                     case1 = len(dts) == 1 and dts[0].get_num_guesses() == 1
                     # More than 1 direct triangulation object
@@ -161,10 +167,13 @@ class multi_tri(Algorithm):
                     case3 = len(dts) == 1 and dts[0].get_num_guesses() > 1
                     # print(case1, "  ", case2)
                     if case1:  # Resolvable, assign and move on
+                        print("CASE 1")
                         loc = dts[0].get_guesses()[0]
                         node.set_position_vec(loc)
                         self.resolved_nodes.append(node)
+                        node.display_triangulations()
                     elif case2:
+                        print("CASE 2")
                         # Step 5.1) Loop through triangulations and generate
                         #           clusters
                         clusters = []
@@ -182,25 +191,71 @@ class multi_tri(Algorithm):
                             # If we have more than one guess, the cluster is valid
                             if cluster.get_num_points() > 1:
                                 clusters.append(cluster)
-
                         # Step 5.2-5.5 Resolution based on cluster
                         smallest_radius = math.inf
                         best_cluster = None
-                        # Loop through clusters to find best one
+                        next_best_cluster = None
+                        # Loop through clusters to find the best one
                         for cluster in clusters:
                             radius = cluster.get_radius()
                             # Record the smallest cluster radius
+                            cluster.display(ghost=True)
                             if radius < smallest_radius:
                                 smallest_radius = radius
                                 best_cluster = cluster
-
+                        smallest_radius = math.inf
+                        next_best_cluster = None
+                        # Loop through clusters to find the next best one
+                        for cluster in clusters:
+                            if cluster == best_cluster:
+                                continue
+                            radius = cluster.get_radius()
+                            # Record the smallest cluster radius
+                            cluster.display(ghost=True)
+                            if radius < smallest_radius:
+                                smallest_radius = radius
+                                next_best_cluster = cluster
+                        # Look at the two best clusters and see if they are too close in size.
+                        # A super close size number could indicate that the three nodes used to 
+                        # triangulate this one are in a line.
+                        if next_best_cluster is not None and next_best_cluster != best_cluster:
+                            r1 = next_best_cluster.get_radius()
+                            r2 = best_cluster.get_radius()
+                            if math.fabs(r1 - r2) < self.config['min_cluster_difference']:
+                                # The cluster sizes are too simular!
+                                # Make them two guesses and send it off to the educated guesser
+                                print(node, ' Forcing Tier II Queue')
+                                g1 = best_cluster.get_center()
+                                g2 = next_best_cluster.get_center()
+                                dt = node.get_triangulations()[0]  # Should this dt be picked so it includes the two cluster locations?
+                                node.triangulate_list = []
+                                node.add_triangulation(dt)
+                                dt.guess_list = []
+                                dt.directly_add_guess(g1)
+                                dt.directly_add_guess(g2)
+                                guessing = True
+                                continue
                         if best_cluster is not None and best_cluster.get_radius() <= self.config['max_cluster_radius']:
                             # Resolved!!
+                            best_cluster.display()
                             loc = best_cluster.get_center()
+                            if self.multi_pipe is not None:
+                                for point in best_cluster.get_points():
+                                    # canvas.connect_nodes((loc.x, loc.y), (point.x, point.y))
+                                    self.multi_pipe.send({
+                                        "cmd":"connect_points",
+                                        "args":{
+                                            "pos1": (loc.x, loc.y),
+                                            "pos2": (point.x, point.y)
+                                        }
+                                    })
+
                             node.set_position_vec(loc)
                             self.resolved_nodes.append(node)
+                            node.display_triangulations()
 
                     elif case3:
+                        print("CASE 3")
                         # We're gonna have to guess!
                         guessing = True
                         pass
@@ -294,6 +349,8 @@ class multi_tri(Algorithm):
                         best_guess = best_guess_option[1]
                         node.set_position_vec(best_guess)
                         self.resolved_nodes.append(node)
+                        # Display
+                        node.display_triangulations()
                         # Queue another calculation run
                         guess_success = True
 
@@ -308,10 +365,13 @@ class multi_tri(Algorithm):
 
         # Done!
 
-        print("")
-        print('--- Results '.ljust(60, '-'))
-        for key, value in self.nodes.items():
-            value.print_report()
+        # print("")
+        # print('--- Results '.ljust(60, '-'))
+        # for key, value in self.nodes.items():
+            # value.print_report()
+
+        for node in self.resolved_nodes:
+            node.show()
 
         callback(render=True)
 

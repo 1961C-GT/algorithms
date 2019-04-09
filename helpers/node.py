@@ -6,6 +6,8 @@ from algorithms.algorithm import Vector2
 
 class Node:
     node_arr = {}
+    min_dist = 500    # mm
+    max_dist = 1000000 # mm
 
     def __init__(self, node_id=None, name=None, is_base=False, x=None, y=None, multi_pipe=None):
         if node_id is None:
@@ -17,11 +19,10 @@ class Node:
         self.is_base = is_base
         self.real_x = x  # random.randint(25, 600)
         self.real_y = y  # random.randint(25, 600)
-        self.real_obj = None
-        self.guess_obj = None
         self.resolved = False
         self.triangulate_list = []
         self.multi_pipe = multi_pipe
+        self.communicate_list = []
         if self.multi_pipe is not None:
             self.piping = True
         else:
@@ -34,7 +35,7 @@ class Node:
             self.x = None
             self.y = None
         self.measurements = []
-        self.measurement_history = []
+        # self.measurement_history = {}
 
     
     def set_pipe(self, pipe_in):
@@ -42,14 +43,48 @@ class Node:
         self.piping = True
 
     def start_new_cycle(self):
-        if self.measurements:
-            self.measurement_history.append(self.measurements)
-        if len(self.measurement_history) > config.MAX_HISTORY:
-            self.measurement_history.pop(0)
+        # for other_node in self.communicate_list:
+        #     key = other_node.id
+        #     if key not in self.measurement_history:
+        #         # Add a new list to keep track of measures from this new node
+        #         self.measurement_history[key] = []
+        #     if self.measurements:
+        #         for meas in self.measurements:
+        #             if meas.node1 == self:
+        #                 self.measurement_history[key].append(meas)
+        #     if len(self.measurement_history[key]) > config.MAX_HISTORY:
+        #         self.measurement_history[key].pop(0)
         self.measurements = []
+        self.triangulate_list = []
+        if not self.is_base:
+            self.x = None
+            self.y = None
+            self.resolved = False
+        # if self.measurements:
+        #     self.measurement_history.append(self.measurements)
+        # if len(self.measurement_history) > config.MAX_HISTORY:
+        #     self.measurement_history.pop(0)
+        # self.measurements = []
 
     def add_measurement(self, node_b, dist):
-        self.measurements.append(Measurement(self, node_b, dist))
+        if dist > Node.min_dist and dist < Node.max_dist:
+            # print(key)
+            # print(self.measurement_history)
+            # print(self.measurement_history[key])
+            self.measurements.append(Measurement(self, node_b, dist))
+            # self.add_to_communicate_list(node_b)
+        else:
+            # self.measurements.append(Measurement(self, node_b, None))
+            # self.add_to_communicate_list(node_b)
+            print(f"Discarded meas with {dist} distance to node {node_b.id} due to bounding error.")
+
+    # def add_to_communicate_list(self, node_b):
+    #     if node_b not in self.communicate_list:
+    #         self.communicate_list.append(node_b)
+    #         key = node_b.id
+    #         if key not in self.measurement_history:
+    #             # Add a new list to keep track of measures from this new node
+    #             self.measurement_history[key] = []
 
     def is_resolved(self):
         return self.resolved
@@ -64,6 +99,10 @@ class Node:
 
     def get_triangulations(self):
         return self.triangulate_list
+
+    def display_triangulations(self):
+        for dt in self.triangulate_list:
+            dt.displayTriangulation((self.x, self.y))
 
     def set_position_vec(self, pos):
         self.x = pos.x
@@ -82,35 +121,65 @@ class Node:
     def get_real_position_vec(self):
         return Vector2(self.real_x, self.real_y)
 
-    def error_to_str(self):
-        if self.x is not None and self.y is not None:
-            offset = self.get_position_vec() - self.get_real_position_vec()
-            d = offset.magnitude()
-            return "{:.3f}ft".format(d)
-        else:
-            return "Unresolved"
+    # def error_to_str(self):
+    #     if self.x is not None and self.y is not None:
+    #         offset = self.get_position_vec() - self.get_real_position_vec()
+    #         d = offset.magnitude()
+    #         return "{:.3f}ft".format(d)
+    #     else:
+    #         return "Unresolved"
 
-    def print_report(self):
-        if self.x is not None and self.y is not None:
-            print(str(self), " : ", self.error_to_str() + ' error')
+    # def print_report(self):
+    #     if self.x is not None and self.y is not None:
+    #         print(str(self), " : ", self.error_to_str() + ' error')
 
-    def get_measurement(self, node_id):
-        return next(filter(lambda m: m.node2.id == node_id, self.measurements))
+    def get_measurement(self, node_id, history_avg=True):
+        # if history_avg:
+        #     dist = 0
+        #     counter = 0
+        #     node2 = None
+        #     for meas in self.measurement_history[node_id]:
+        #         if meas.dist == None or meas.dist == 0:
+        #             continue
+        #         node2 = meas.node2
+        #         dist = dist + meas.dist
+        #         counter = counter + 1
+        #     if counter > 0:
+        #         dist = dist / counter
+        #     else:
+        #         return None
+        #     return Measurement(self, node2, dist)
+        # else:
+            return next(filter(lambda m: m.node2.id == node_id, self.measurements))
 
     def get_measurements(self, history_avg=True):
-        if history_avg:
-            m = []
-            for measurement in self.measurements:
-                m.append(measurement.avg_with_history(self.measurement_history))
-            return m
-        else:
+        # if history_avg:
+        #     m = []
+        #     for node in self.communicate_list:
+        #         key = node.id
+        #         dist = 0
+        #         counter = 0
+        #         for meas in self.measurement_history[key]:
+        #             if meas.dist == None or meas.dist == 0:
+        #                 continue
+        #             dist = dist + meas.dist
+        #             counter = counter + 1
+        #         if counter > 0:
+        #             dist = dist / counter
+        #         else:
+        #             print("NONE MEAS")
+        #         m.append(Measurement(self, node, dist))
+        #     # for measurement in self.measurements:
+        #     #     m.append(measurement.avg_with_history(self.measurement_history))
+        #     return m
+        # else:
             return self.measurements
 
     def clear_measurements(self):
         self.measurements = []
 
     def show(self):
-        if self.x is None or self.y is None or self.piping is False:
+        if self.x is None or self.y is None or self.multi_pipe is None:
             return
         # fill = "white"
         # if Distance(self.get_real_position_vec(), self.get_position_vec()) < 20:

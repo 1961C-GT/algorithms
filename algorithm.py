@@ -91,16 +91,15 @@ def get_intersections(p0, p1, r0, r1):
     # equation 2: simple cases
     if d > (r0 + r1):
         # no collision
+        # print("No Collision")
         return [None, None]
     elif d == 0 or d < abs(r0 - r1):
         # full containment
+        # print("Full Containment")
         return [None, None]
-
+    
     # equation 3
     a = (r0 ** 2 - r1 ** 2 + d ** 2) / (2 * d)
-
-    # equation 4
-    h = math.sqrt(r0 ** 2 - a ** 2)
 
     # equation 5
     p2 = p0 + a * (p1 - p0) / d
@@ -108,6 +107,8 @@ def get_intersections(p0, p1, r0, r1):
     # equation 6
     if d == r0 + r1:
         return [p2, None]
+
+    h = math.sqrt(r0 ** 2 - a ** 2)
 
     # equation 8
     alpha_x = p2.x + h * (p1.y - p0.y) / d

@@ -7,7 +7,7 @@ class Measurement:
         self.cleared = False
         self.confidence = 1.0
         self.opinions = 1
-        if self.err == 0:
+        if self.err == 0 and dist is not None:
             self.calc_error()
 
     def calc_error(self):
