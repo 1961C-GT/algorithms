@@ -80,13 +80,18 @@ class DirectTriangulation:
         # print("dt displayTriangulation")
         if self.multi_pipe is None:
             return
+        d1 = ((Vector2(resolved_position[0], resolved_position[1]) - self.res1).magnitude()) / 1000
+        d2 = ((Vector2(resolved_position[0], resolved_position[1]) - self.res2).magnitude()) / 1000
         self.multi_pipe.send({
             "cmd": "connect_points",
             "args":{
                 "pos1":resolved_position,
                 "pos2":(self.res1.x, self.res1.y),
                 "dashed":True,
-                "color":"#6b92a7"
+                "color":"#6b92a7",
+                "text": str(round(d1)) + "m",
+                "text_size": 10,
+                "text_color": "#6b92a7"
             }
         })
         self.multi_pipe.send({
@@ -95,7 +100,10 @@ class DirectTriangulation:
                 "pos1":resolved_position,
                 "pos2":(self.res2.x, self.res2.y),
                 "dashed":True,
-                "color":"#6b92a7"
+                "color":"#6b92a7",
+                "text": str(round(d1)) + "m",
+                "text_size": 10,
+                "text_color": "#6b92a7"
             }
         })
         for guess in self.guess_list:

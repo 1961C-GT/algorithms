@@ -11,6 +11,7 @@ class Node:
     max_dist = 1000000 # mm
     max_history = 10
     max_move_per_cycle = 5000
+    use_s_last = True
 
     def __init__(self, node_id=None, name=None, is_base=False, x=None, y=None, multi_pipe=None):
         if node_id is None:
@@ -62,22 +63,11 @@ class Node:
                 self.position_history.pop(0)
 
         self.added_position = False
-        # if self.measurements:
-        #     self.measurement_history.append(self.measurements)
-        # if len(self.measurement_history) > config.MAX_HISTORY:
-        #     self.measurement_history.pop(0)
-        # self.measurements = []
 
     def add_measurement(self, node_b, dist, std=None):
         if dist > Node.min_dist and dist < Node.max_dist:
-            # print(key)
-            # print(self.measurement_history)
-            # print(self.measurement_history[key])
             self.measurements.append(Measurement(self, node_b, dist, std=std))
-            # self.add_to_communicate_list(node_b)
         else:
-            # self.measurements.append(Measurement(self, node_b, None))
-            # self.add_to_communicate_list(node_b)
             print(f"Discarded meas with {dist} distance to node {node_b.id} due to bounding error.")
 
     def is_resolved(self):
@@ -88,6 +78,11 @@ class Node:
         if len(self.position_history) == 0:
             return None
         return self.position_history[len(self.position_history)-1]
+
+    def get_second_last_position(self):
+        if len(self.position_history) < 2:
+            return None
+        return self.position_history[len(self.position_history)-2]
     
     def get_avg_position(self):
         x_sum = 0
@@ -119,26 +114,8 @@ class Node:
             dt.display_triangulation((self.x, self.y))
 
     def set_position_vec(self, pos):
-        # last = self.get_last_position()
-        # if last is None:
-        #     last_pos = pos
-        # else:
-        #     last_pos = Vector2(last[0], last[1])
-        # offset = last_pos - pos
-        # d = offset.magnitude()
-
-        # print(d)
-
-        # if d <= Node.max_move_per_cycle:
         self.x = pos.x
         self.y = pos.y
-        # else:
-            # vel = self.get_avg_velocity()
-            # pos = Vector2(last[0], last[1])
-            # new_pos = pos + vel
-            # self.x = new_pos.x
-            # self.y = new_pos.y
-            # self.extrapolate = True
         
         self.position_history.append((pos.x, pos.y))
         self.added_position = True
@@ -149,9 +126,14 @@ class Node:
 
     def consider_last_location(self):
         last = self.get_last_position()
+        slast = self.get_second_last_position()
         if last is not None:
             dt = DirectTriangulation(None, None, None, None, empty=True)
             dt.directly_add_guess(Vector2(last[0], last[1]))
+            self.add_triangulation(dt)
+        if Node.use_s_last and slast is not None:
+            dt = DirectTriangulation(None, None, None, None, empty=True)
+            dt.directly_add_guess(Vector2(slast[0], slast[1]))
             self.add_triangulation(dt)
 
     def get_position(self):
@@ -166,58 +148,10 @@ class Node:
     def get_real_position_vec(self):
         return Vector2(self.real_x, self.real_y)
 
-    # def error_to_str(self):
-    #     if self.x is not None and self.y is not None:
-    #         offset = self.get_position_vec() - self.get_real_position_vec()
-    #         d = offset.magnitude()
-    #         return "{:.3f}ft".format(d)
-    #     else:
-    #         return "Unresolved"
-
-    # def print_report(self):
-    #     if self.x is not None and self.y is not None:
-    #         print(str(self), " : ", self.error_to_str() + ' error')
-
     def get_measurement(self, node_id, history_avg=True):
-        # if history_avg:
-        #     dist = 0
-        #     counter = 0
-        #     node2 = None
-        #     for meas in self.measurement_history[node_id]:
-        #         if meas.dist == None or meas.dist == 0:
-        #             continue
-        #         node2 = meas.node2
-        #         dist = dist + meas.dist
-        #         counter = counter + 1
-        #     if counter > 0:
-        #         dist = dist / counter
-        #     else:
-        #         return None
-        #     return Measurement(self, node2, dist)
-        # else:
             return next(filter(lambda m: m.node2.id == node_id, self.measurements))
 
     def get_measurements(self, history_avg=True):
-        # if history_avg:
-        #     m = []
-        #     for node in self.communicate_list:
-        #         key = node.id
-        #         dist = 0
-        #         counter = 0
-        #         for meas in self.measurement_history[key]:
-        #             if meas.dist == None or meas.dist == 0:
-        #                 continue
-        #             dist = dist + meas.dist
-        #             counter = counter + 1
-        #         if counter > 0:
-        #             dist = dist / counter
-        #         else:
-        #             print("NONE MEAS")
-        #         m.append(Measurement(self, node, dist))
-        #     # for measurement in self.measurements:
-        #     #     m.append(measurement.avg_with_history(self.measurement_history))
-        #     return m
-        # else:
             return self.measurements
 
     def clear_measurements(self):
@@ -226,10 +160,6 @@ class Node:
     def show(self):
         if self.x is None or self.y is None or self.multi_pipe is None:
             return
-        # fill = "white"
-        # if Distance(self.get_real_position_vec(), self.get_position_vec()) < 20:
-        #     fill = "green"
-        # size = 10
         cmd_obj = {
             "cmd": "draw_circle",
             "args": {
@@ -239,30 +169,33 @@ class Node:
                 "outline": "",
                 "x": self.x,
                 "y": self.y,
-                "convert_to_m": True
+                "convert_to_m": True,
+                "text":self.id
             }
         }
         if self.is_base:
             cmd_obj['args']['fill'] = "yellow"
+        else:
+            for hist in self.position_history:
+                h = {
+                    "cmd": "draw_circle",
+                    "args": {
+                        "fill": "grey",
+                        "r": 100,
+                        "tags": ['node'],
+                        "outline": "",
+                        "x": hist[0],
+                        "y": hist[1],
+                        "convert_to_m": True
+                    }
+                }
+                self.multi_pipe.send(h)
 
         if self.extrapolate:
             cmd_obj['args']['fill'] = "purple"
 
         self.multi_pipe.send(cmd_obj)
-        # obj = canvas.create_circle(
-        #     self.x, self.y, size, fill=fill, outline="", tags=['node'])
-        # if self.real_obj is not None:
-        #     coords = canvas.coords(self.real_obj)
-        #     x = (coords[0] + coords[2])/2
-        #     y = (coords[1] + coords[3])/2
-        #     canvas.create_line(self.x, self.y, x, y,
-        #                        fill="#3c4048", dash=(3, 5))
-        #     canvas.tag_raise(obj)
-        #     canvas.tag_raise(self.real_obj)
-        # self.guess_obj = obj
-        # self.__class__.node_arr[obj] = "#" + str(self.resolution_order) + " | " + str(self) + ' | ' + self.errorToStr()
-        # canvas.tag_bind(obj, '<Enter>', self.__class__.nodeEnter)
-        # canvas.tag_bind(obj, '<Leave>', self.__class__.nodeLeave)
+
 
     def to_string(self):
         if self.x is not None and self.y is not None:
