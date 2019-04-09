@@ -97,6 +97,25 @@ class DirectTriangulation:
                 "color":"#6b92a7"
             }
         })
+        for guess in self.guess_list:
+            self.multi_pipe.send({
+                "cmd": "connect_points",
+                "args":{
+                    "pos1":(guess.x, guess.y),
+                    "pos2":(self.res1.x, self.res1.y),
+                    "dashed":True,
+                    "color":"#383c49"
+                }
+            })
+            self.multi_pipe.send({
+                "cmd": "connect_points",
+                "args":{
+                    "pos1":(guess.x, guess.y),
+                    "pos2":(self.res2.x, self.res2.y),
+                    "dashed":True,
+                    "color":"#383c49"
+                }
+            })
 
 class Cluster:
     def __init__(self, title=None, multi_pipe=None):
@@ -152,9 +171,10 @@ class Cluster:
 
     # Display the cluster on the UI
     def display(self, ghost=False):
-        # print("cluster display")
+        print("cluster display")
         if self.multi_pipe is None:
             return
+        print("cluster display 2")
         if self.pure is False:
             self.getRadius()
         for p in self._points:
@@ -163,14 +183,16 @@ class Cluster:
                 "args":{
                     "x": p.x,
                     "y": p.y,
-                    "r": 2,
+                    "r": 0.2,
                     "dashed": False,
                     "outline": "",
                     "fill":"red"
                 }
             }
             if ghost is True:
-                point_obj['args']['fill'] = "#4678a1"
+                # point_obj['args']['fill'] = "#4678a1"
+                point_obj['args']['fill'] = "orange"
+            print("cluster display send")
             self.multi_pipe.send(point_obj)
         main_obj = {
             "cmd":"draw_circle",
@@ -178,9 +200,10 @@ class Cluster:
                 "x": self.center.x,
                 "y": self.center.y,
                 "r": self.radius,
-                "dashed": False,
+                "dashed": True,
                 "outline": "#383c49",
-                "fill":""
+                "fill":"",
+                "width":1
             }
         }
         if ghost is False:

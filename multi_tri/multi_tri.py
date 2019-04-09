@@ -147,7 +147,7 @@ class multi_tri(Algorithm):
                     dt.triangulate()
                     target = m1.get_unresolved_node()
                     target.add_triangulation(dt)
-                    # dt.display()
+                    dt.display()
 
                 # Step 5) Parse through each un-resolved node to resolve position (Need either
                 #         1 direct triangulation object with a single guess, or greater than 1
@@ -181,7 +181,7 @@ class multi_tri(Algorithm):
                         # Loop through each key guess
                         for guess in key_dt.get_guesses():
                             # Loop through other triangulations
-                            cluster = Cluster()
+                            cluster = Cluster(multi_pipe=self.multi_pipe)
                             cluster.add_point(guess)
                             for x in range(1, len(dts)):
                                 # Add the cloest guess from each other triangulation)
