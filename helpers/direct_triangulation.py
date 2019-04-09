@@ -4,20 +4,21 @@ import math
 
 
 class DirectTriangulation:
-    def __init__(self, meas1, meas2, res1=None, res2=None, title=None, multi_pipe=None):
+    def __init__(self, meas1, meas2, res1=None, res2=None, empty=False, title=None, multi_pipe=None):
         self.meas1 = meas1
         self.meas2 = meas2
         self.res1 = res1
         self.res2 = res2
         self.title = title
         self.multi_pipe = multi_pipe
-        if self.res1 is None:
-            self.res1 = self.meas1.get_resolved_node()
-        if self.res2 is None:
-            self.res2 = self.meas2.get_resolved_node()
-        if self.res1 is None or self.res1 is False or self.res2 is None or self.res2 is False:
-            print("---ERROR--- Both measurements require a resolved node, or resolved nodes must be provided.")
-            return
+        if empty is False:
+            if self.res1 is None:
+                self.res1 = self.meas1.get_resolved_node()
+            if self.res2 is None:
+                self.res2 = self.meas2.get_resolved_node()
+            if self.res1 is None or self.res1 is False or self.res2 is None or self.res2 is False:
+                print("---ERROR--- Both measurements require a resolved node, or resolved nodes must be provided.")
+                return
         self.guess_list = []
 
     # Triangulate two guesses from the provided measurements
@@ -68,14 +69,14 @@ class DirectTriangulation:
                 "args":{
                     "x":guess.x,
                     "y":guess.y,
-                    "r":0.5,
+                    "r":150,
                     "dashed":False,
                     "outline":"",
                     "fill":"red"
                 }
             })
 
-    def displayTriangulation(self, resolved_position):
+    def display_triangulation(self, resolved_position):
         # print("dt displayTriangulation")
         if self.multi_pipe is None:
             return
@@ -171,10 +172,8 @@ class Cluster:
 
     # Display the cluster on the UI
     def display(self, ghost=False):
-        print("cluster display")
         if self.multi_pipe is None:
             return
-        print("cluster display 2")
         if self.pure is False:
             self.getRadius()
         for p in self._points:
@@ -183,7 +182,7 @@ class Cluster:
                 "args":{
                     "x": p.x,
                     "y": p.y,
-                    "r": 0.2,
+                    "r": 100,
                     "dashed": False,
                     "outline": "",
                     "fill":"red"
@@ -192,7 +191,6 @@ class Cluster:
             if ghost is True:
                 # point_obj['args']['fill'] = "#4678a1"
                 point_obj['args']['fill'] = "orange"
-            print("cluster display send")
             self.multi_pipe.send(point_obj)
         main_obj = {
             "cmd":"draw_circle",

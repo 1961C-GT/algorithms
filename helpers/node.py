@@ -2,6 +2,7 @@ import uuid
 import config
 from algorithms.helpers.measurement import Measurement
 from algorithms.algorithm import Vector2
+from algorithms.helpers.direct_triangulation import DirectTriangulation
 
 
 class Node:
@@ -48,17 +49,6 @@ class Node:
         self.piping = True
 
     def start_new_cycle(self):
-        # for other_node in self.communicate_list:
-        #     key = other_node.id
-        #     if key not in self.measurement_history:
-        #         # Add a new list to keep track of measures from this new node
-        #         self.measurement_history[key] = []
-        #     if self.measurements:
-        #         for meas in self.measurements:
-        #             if meas.node1 == self:
-        #                 self.measurement_history[key].append(meas)
-        #     if len(self.measurement_history[key]) > config.MAX_HISTORY:
-        #         self.measurement_history[key].pop(0)
         self.measurements = []
         self.triangulate_list = []
         if not self.is_base:
@@ -90,37 +80,9 @@ class Node:
             # self.add_to_communicate_list(node_b)
             print(f"Discarded meas with {dist} distance to node {node_b.id} due to bounding error.")
 
-    # def add_to_communicate_list(self, node_b):
-    #     if node_b not in self.communicate_list:
-    #         self.communicate_list.append(node_b)
-    #         key = node_b.id
-    #         if key not in self.measurement_history:
-    #             # Add a new list to keep track of measures from this new node
-    #             self.measurement_history[key] = []
-
     def is_resolved(self):
         return self.resolved
 
-    # def set_position(self, x, y):
-    #     avg = self.get_avg_position()
-    #     cur_pos = Vector2(avg[0], avg[1])
-    #     new_pos = Vector2(x, y)
-    #     offset = cur_pos - new_pos
-    #     d = offset.magnitude()
-    #     if d <= Node.max_move_per_cycle:
-    #         self.x = x
-    #         self.y = y
-    #     else:
-            
-    #         self.x = avg[0]
-    #         self.y = avg[1]
-    #         self.extrapolate = True
-        
-    #     self.resolved = True
-
-    #     self.position_history.append((x, y))
-    #     if len(self.position_history) > Node.max_history:
-    #         self.position_history.pop(0)
 
     def get_last_position(self):
         if len(self.position_history) == 0:
@@ -154,37 +116,43 @@ class Node:
 
     def display_triangulations(self):
         for dt in self.triangulate_list:
-            dt.displayTriangulation((self.x, self.y))
+            dt.display_triangulation((self.x, self.y))
 
     def set_position_vec(self, pos):
-        last = self.get_last_position()
-        if last is None:
-            last_pos = pos
-        else:
-            last_pos = Vector2(last[0], last[1])
-        offset = last_pos - pos
-        d = offset.magnitude()
+        # last = self.get_last_position()
+        # if last is None:
+        #     last_pos = pos
+        # else:
+        #     last_pos = Vector2(last[0], last[1])
+        # offset = last_pos - pos
+        # d = offset.magnitude()
 
         # print(d)
 
+        # if d <= Node.max_move_per_cycle:
+        self.x = pos.x
+        self.y = pos.y
+        # else:
+            # vel = self.get_avg_velocity()
+            # pos = Vector2(last[0], last[1])
+            # new_pos = pos + vel
+            # self.x = new_pos.x
+            # self.y = new_pos.y
+            # self.extrapolate = True
+        
         self.position_history.append((pos.x, pos.y))
         self.added_position = True
         if len(self.position_history) > Node.max_history:
             self.position_history.pop(0)
 
-        if d <= Node.max_move_per_cycle:
-            self.x = pos.x
-            self.y = pos.y
-        else:
-            # avg = self.get_avg_position()
-            vel = self.get_avg_velocity()
-            pos = Vector2(last[0], last[1])
-            new_pos = pos + vel
-            self.x = new_pos.x
-            self.y = new_pos.y
-            self.extrapolate = True
-        
         self.resolved = True
+
+    def consider_last_location(self):
+        last = self.get_last_position()
+        if last is not None:
+            dt = DirectTriangulation(None, None, None, None, empty=True)
+            dt.directly_add_guess(Vector2(last[0], last[1]))
+            self.add_triangulation(dt)
 
     def get_position(self):
         return self.x, self.y
@@ -266,7 +234,7 @@ class Node:
             "cmd": "draw_circle",
             "args": {
                 "fill": "white",
-                "r": 0.5,
+                "r": 200,
                 "tags": ['node'],
                 "outline": "",
                 "x": self.x,

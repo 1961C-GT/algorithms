@@ -157,6 +157,7 @@ class multi_tri(Algorithm):
                     if node in self.resolved_nodes:
                         continue
                     # print(node)
+                    node.consider_last_location()
                     dts = node.get_triangulations()
                     # print(dts)
                     # 1 direct triangulation object with 1 guess only
@@ -238,6 +239,7 @@ class multi_tri(Algorithm):
                         if best_cluster is not None and best_cluster.get_radius() <= self.config['max_cluster_radius']:
                             # Resolved!!
                             best_cluster.display()
+                            print(f"R: {best_cluster.get_radius()}")
                             loc = best_cluster.get_center()
                             if self.multi_pipe is not None:
                                 for point in best_cluster.get_points():
