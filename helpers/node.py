@@ -44,7 +44,14 @@ class Node:
         self.measurements = []
         # self.measurement_history = {}
 
-    
+    def force_set_resolved(self, resolved):
+        self.resolved = resolved
+
+    def set_real_x_pos(self, x):
+        self.real_x = x
+        self.x = x
+        self.resolved = True
+
     def set_pipe(self, pipe_in):
         self.multi_pipe = pipe_in
         self.piping = True
@@ -158,7 +165,7 @@ class Node:
         self.measurements = []
 
     def show(self):
-        if self.x is None or self.y is None or self.multi_pipe is None:
+        if self.x is None or self.y is None or self.multi_pipe is None or self.resolved is False:
             return
         cmd_obj = {
             "cmd": "draw_circle",

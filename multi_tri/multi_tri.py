@@ -9,11 +9,21 @@ import time
 
 
 class multi_tri(Algorithm):
-    def __init__(self, nodes):
+    def __init__(self, nodes, resolved_idxs):
         super().__init__(nodes)
         self.measure_list = []
         self.backup_nodes = nodes
-        self.resolved_nodes = [nodes['0'], nodes['1']]  # Known
+        self.base_nodes = []
+        for idx in resolved_idxs:
+            self.base_nodes.append(nodes[idx])
+        if self.base_nodes == []:
+            print('NO BASE NODES CONFIGURED')
+        # self.base_nodes = [nodes['0'], nodes['1']]
+        self.resolved_nodes = []
+        for node in self.base_nodes:
+            if node.is_resolved():
+                self.resolved_nodes.append(node)
+        # self.resolved_nodes = [nodes['0'], nodes['1']]  # Known
 
         self.config = {
             'max_cluster_radius': 25000, #50,
@@ -374,6 +384,30 @@ class multi_tri(Algorithm):
 
         for node in self.resolved_nodes:
             node.show()
+        
+        bases_resolved = True
+        for node in self.base_nodes:
+            if node.is_resolved() is False:
+                bases_resolved = False
+                break
+
+        if bases_resolved is True:
+            b1 = self.base_nodes[0].get_position_vec()
+            b2 = self.base_nodes[1].get_position_vec()
+            self.multi_pipe.send({
+                "cmd": "connect_points",
+                "args": {
+                    "pos1": (b1.x, b1.y),
+                    "pos2": (b2.x, b2.y),
+                    "text": str(),
+                    "arrow": "both",
+                    "dashed":True,
+                    "color":"#6b92a7",
+                    "text": str(round((self.base_nodes[1].x-self.base_nodes[0].x)/100)/10) + "m",
+                    "text_size": 10,
+                    "text_color": "#6b92a7"
+                }
+            })
 
         callback(render=True)
 
