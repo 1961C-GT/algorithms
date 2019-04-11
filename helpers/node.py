@@ -35,6 +35,10 @@ class Node:
         else:
             self.piping = False
         if is_base:
+            if x is None:
+                x = 0
+            if y is None:
+                y = 0
             self.x = x
             self.y = y
             self.resolved = True
@@ -177,11 +181,15 @@ class Node:
                 "x": self.x,
                 "y": self.y,
                 "convert_to_m": True,
-                "text":self.id
+                "text":self.id,
+                "text_color":"white",
+                "text_size": 10
             }
         }
         if self.is_base:
             cmd_obj['args']['fill'] = "yellow"
+            cmd_obj['args']['text_size'] = 14
+            cmd_obj['args']['text_y_bias'] = -20
         else:
             for hist in self.position_history:
                 h = {

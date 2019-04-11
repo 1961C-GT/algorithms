@@ -9,21 +9,17 @@ import time
 
 
 class multi_tri(Algorithm):
-    def __init__(self, nodes, resolved_idxs):
+    def __init__(self, nodes, base1_idx, base2_idx):
         super().__init__(nodes)
         self.measure_list = []
         self.backup_nodes = nodes
         self.base_nodes = []
-        for idx in resolved_idxs:
-            self.base_nodes.append(nodes[idx])
-        if self.base_nodes == []:
-            print('NO BASE NODES CONFIGURED')
-        # self.base_nodes = [nodes['0'], nodes['1']]
+        self.base_nodes.append(nodes[base1_idx])
+        self.base_nodes.append(nodes[base2_idx])
         self.resolved_nodes = []
         for node in self.base_nodes:
             if node.is_resolved():
                 self.resolved_nodes.append(node)
-        # self.resolved_nodes = [nodes['0'], nodes['1']]  # Known
 
         self.config = {
             'max_cluster_radius': 25000, #50,
