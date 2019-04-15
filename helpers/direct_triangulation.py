@@ -66,13 +66,13 @@ class DirectTriangulation:
         for guess in self.guess_list:
             self.multi_pipe.send({
                 "cmd": "draw_circle",
-                "args":{
-                    "x":guess.x,
-                    "y":guess.y,
-                    "r":150,
-                    "dashed":False,
-                    "outline":"blank",
-                    "fill":"guess"
+                "args": {
+                    "x": guess.x,
+                    "y": guess.y,
+                    "r": 150,
+                    "dashed": False,
+                    "outline": "blank",
+                    "fill": "guess"
                 }
             })
 
@@ -84,11 +84,11 @@ class DirectTriangulation:
         d2 = ((Vector2(resolved_position[0], resolved_position[1]) - self.res2).magnitude()) / 1000
         self.multi_pipe.send({
             "cmd": "connect_points",
-            "args":{
-                "pos1":resolved_position,
-                "pos2":(self.res1.x, self.res1.y),
-                "dashed":True,
-                "color":"highlight_line",
+            "args": {
+                "pos1": resolved_position,
+                "pos2": (self.res1.x, self.res1.y),
+                "dashed": True,
+                "color": "highlight_line",
                 "text": str(round(d1)) + "m",
                 "text_size": "text_size_small",
                 "text_color": "highlight_line"
@@ -96,11 +96,11 @@ class DirectTriangulation:
         })
         self.multi_pipe.send({
             "cmd": "connect_points",
-            "args":{
-                "pos1":resolved_position,
-                "pos2":(self.res2.x, self.res2.y),
-                "dashed":True,
-                "color":"highlight_line",
+            "args": {
+                "pos1": resolved_position,
+                "pos2": (self.res2.x, self.res2.y),
+                "dashed": True,
+                "color": "highlight_line",
                 "text": str(round(d2)) + "m",
                 "text_size": "text_size_small",
                 "text_color": "highlight_line"
@@ -109,22 +109,23 @@ class DirectTriangulation:
         for guess in self.guess_list:
             self.multi_pipe.send({
                 "cmd": "connect_points",
-                "args":{
-                    "pos1":(guess.x, guess.y),
-                    "pos2":(self.res1.x, self.res1.y),
-                    "dashed":True,
-                    "color":"ghost_line"
+                "args": {
+                    "pos1": (guess.x, guess.y),
+                    "pos2": (self.res1.x, self.res1.y),
+                    "dashed": True,
+                    "color": "ghost_line"
                 }
             })
             self.multi_pipe.send({
                 "cmd": "connect_points",
-                "args":{
-                    "pos1":(guess.x, guess.y),
-                    "pos2":(self.res2.x, self.res2.y),
-                    "dashed":True,
-                    "color":"ghost_line"
+                "args": {
+                    "pos1": (guess.x, guess.y),
+                    "pos2": (self.res2.x, self.res2.y),
+                    "dashed": True,
+                    "color": "ghost_line"
                 }
             })
+
 
 class Cluster:
     def __init__(self, title=None, multi_pipe=None):
@@ -186,14 +187,14 @@ class Cluster:
             self.getRadius()
         for p in self._points:
             point_obj = {
-                "cmd":"draw_circle",
-                "args":{
+                "cmd": "draw_circle",
+                "args": {
                     "x": p.x,
                     "y": p.y,
                     "r": 100,
                     "dashed": False,
                     "outline": "blank",
-                    "fill":"guess"
+                    "fill": "guess"
                 }
             }
             if ghost is True:
@@ -201,15 +202,15 @@ class Cluster:
                 point_obj['args']['fill'] = "orange"
             self.multi_pipe.send(point_obj)
         main_obj = {
-            "cmd":"draw_circle",
-            "args":{
+            "cmd": "draw_circle",
+            "args": {
                 "x": self.center.x,
                 "y": self.center.y,
                 "r": self.radius,
                 "dashed": True,
                 "outline": "ghost_line",
-                "fill":"blank",
-                "width":1
+                "fill": "blank",
+                "width": 1
             }
         }
         if ghost is False:

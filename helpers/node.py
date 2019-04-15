@@ -1,5 +1,5 @@
 import uuid
-import config
+
 from algorithms.helpers.measurement import Measurement
 from algorithms.algorithm import Vector2
 from algorithms.helpers.direct_triangulation import DirectTriangulation
@@ -7,8 +7,8 @@ from algorithms.helpers.direct_triangulation import DirectTriangulation
 
 class Node:
     node_arr = {}
-    min_dist = 500    # mm
-    max_dist = 1000000 # mm
+    min_dist = 500  # mm
+    max_dist = 1000000  # mm
     max_history = 10
     max_move_per_cycle = 5000
     use_s_last = True
@@ -84,17 +84,16 @@ class Node:
     def is_resolved(self):
         return self.resolved
 
-
     def get_last_position(self):
         if len(self.position_history) == 0:
             return None
-        return self.position_history[len(self.position_history)-1]
+        return self.position_history[len(self.position_history) - 1]
 
     def get_second_last_position(self):
         if len(self.position_history) < 2:
             return None
-        return self.position_history[len(self.position_history)-2]
-    
+        return self.position_history[len(self.position_history) - 2]
+
     def get_avg_position(self):
         x_sum = 0
         y_sum = 0
@@ -103,8 +102,8 @@ class Node:
             x_sum += pos[0]
             y_sum += pos[1]
             counter += 1
-        return (x_sum/counter, y_sum/counter)
-    
+        return (x_sum / counter, y_sum / counter)
+
     def get_avg_velocity(self):
         hist_vec = []
         for pos in self.position_history:
@@ -127,7 +126,7 @@ class Node:
     def set_position_vec(self, pos):
         self.x = pos.x
         self.y = pos.y
-        
+
         self.position_history.append((pos.x, pos.y))
         self.added_position = True
         if len(self.position_history) > Node.max_history:
@@ -160,10 +159,10 @@ class Node:
         return Vector2(self.real_x, self.real_y)
 
     def get_measurement(self, node_id, history_avg=True):
-            return next(filter(lambda m: m.node2.id == node_id, self.measurements))
+        return next(filter(lambda m: m.node2.id == node_id, self.measurements))
 
     def get_measurements(self, history_avg=True):
-            return self.measurements
+        return self.measurements
 
     def clear_measurements(self):
         self.measurements = []
@@ -181,8 +180,8 @@ class Node:
                 "x": self.x,
                 "y": self.y,
                 "convert_to_m": True,
-                "text":self.name,
-                "text_color":"text",
+                "text": self.name,
+                "text_color": "text",
                 "text_size": "text_size_small"
             }
         }
@@ -210,7 +209,6 @@ class Node:
             cmd_obj['args']['fill'] = "purple"
 
         self.multi_pipe.send(cmd_obj)
-
 
     def to_string(self):
         if self.x is not None and self.y is not None:

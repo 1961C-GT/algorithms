@@ -22,7 +22,7 @@ class multi_tri(Algorithm):
                 self.resolved_nodes.append(node)
 
         self.config = {
-            'max_cluster_radius': 25000, #50,
+            'max_cluster_radius': 25000,  # 50,
             'min_guess_isolation': 72600,
             'min_cluster_difference': 3000
         }
@@ -89,7 +89,6 @@ class multi_tri(Algorithm):
             #     "cmd": "clear_screen",
             #     "args": None
             # })
-            
 
         # Loop coordination for step 4
         guessing = True
@@ -232,7 +231,8 @@ class multi_tri(Algorithm):
                                 print(node, ' Forcing Tier II Queue')
                                 g1 = best_cluster.get_center()
                                 g2 = next_best_cluster.get_center()
-                                dt = node.get_triangulations()[0]  # Should this dt be picked so it includes the two cluster locations?
+                                dt = node.get_triangulations()[
+                                    0]  # Should this dt be picked so it includes the two cluster locations?
                                 node.triangulate_list = []
                                 node.add_triangulation(dt)
                                 dt.guess_list = []
@@ -248,8 +248,8 @@ class multi_tri(Algorithm):
                                 for point in best_cluster.get_points():
                                     # canvas.connect_nodes((loc.x, loc.y), (point.x, point.y))
                                     self.multi_pipe.send({
-                                        "cmd":"connect_points",
-                                        "args":{
+                                        "cmd": "connect_points",
+                                        "args": {
                                             "pos1": (loc.x, loc.y),
                                             "pos2": (point.x, point.y)
                                         }
@@ -372,11 +372,11 @@ class multi_tri(Algorithm):
         # print("")
         # print('--- Results '.ljust(60, '-'))
         # for key, value in self.nodes.items():
-            # value.print_report()
+        # value.print_report()
 
         for node in self.resolved_nodes:
             node.show()
-        
+
         bases_resolved = True
         for node in self.base_nodes:
             if node.is_resolved() is False:
@@ -394,9 +394,9 @@ class multi_tri(Algorithm):
                         "pos2": (b2.x, b2.y),
                         "text": str(),
                         "arrow": "both",
-                        "dashed":True,
-                        "color":"highlight_line",
-                        "text": str(round((self.base_nodes[1].x-self.base_nodes[0].x)/100)/10) + "m",
+                        "dashed": True,
+                        "color": "highlight_line",
+                        "text": str(round((self.base_nodes[1].x - self.base_nodes[0].x) / 100) / 10) + "m",
                         "text_size": "text_size_small",
                         "text_color": "highlight_line"
                     }
