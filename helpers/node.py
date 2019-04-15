@@ -181,7 +181,7 @@ class Node:
                 "x": self.x,
                 "y": self.y,
                 "convert_to_m": True,
-                "text":self.id,
+                "text":self.name,
                 "text_color":"text",
                 "text_size": "text_size_small"
             }
