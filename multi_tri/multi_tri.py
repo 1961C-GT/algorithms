@@ -256,6 +256,7 @@ class multi_tri(Algorithm):
                                     })
 
                             node.set_position_vec(loc)
+                            node.set_solving_cluster(best_cluster)
                             self.resolved_nodes.append(node)
                             node.display_triangulations()
 

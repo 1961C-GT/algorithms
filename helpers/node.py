@@ -63,6 +63,7 @@ class Node:
     def start_new_cycle(self):
         self.measurements = []
         self.triangulate_list = []
+        self.guess_radius = -1
         if not self.is_base:
             self.x = None
             self.y = None
@@ -84,6 +85,11 @@ class Node:
     def is_resolved(self):
         return self.resolved
 
+    def set_solving_cluster(self, cluster):
+        self.guess_radius = cluster.get_radius()
+
+    def get_guess_radius(self):
+        return self.guess_radius
 
     def get_last_position(self):
         if len(self.position_history) == 0:
