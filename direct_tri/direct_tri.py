@@ -3,6 +3,7 @@ from scipy.optimize import minimize
 from scipy.spatial.distance import pdist
 import math
 
+
 # > python3 main.py <data set> direct_tri
 
 # Implementation of https://www.alanzucconi.com/2017/03/13/positioning-and-trilateration/
@@ -22,7 +23,7 @@ class direct_tri(Algorithm):
     def __init__(self, nodes):
         super().__init__(nodes)
 
-    def process(self, callback, canvas):
+    def process(self, callback):
 
         base_nodes = list(filter(lambda n: n.is_base, self.nodes.values()))
         for n in base_nodes:
@@ -34,9 +35,9 @@ class direct_tri(Algorithm):
         for n in direct_tri_nodes:
             print("DT node: {n}".format(n=n))
             result = minimize(
-                mse,                        # The error function
-                (10, 50),                     # The initial guess
-                args=(base_nodes, n.id))    # Additional parameters for error func
+                mse,  # The error function
+                (10, 50),  # The initial guess
+                args=(base_nodes, n.id))  # Additional parameters for error func
             self.nodes[n.id].set_position(result.x[0], result.x[1])
 
         # Done!

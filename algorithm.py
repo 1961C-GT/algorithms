@@ -97,7 +97,7 @@ def get_intersections(p0, p1, r0, r1):
         # full containment
         # print("Full Containment")
         return [None, None]
-    
+
     # equation 3
     a = (r0 ** 2 - r1 ** 2 + d ** 2) / (2 * d)
 
