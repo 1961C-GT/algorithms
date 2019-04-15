@@ -174,16 +174,16 @@ class Node:
         cmd_obj = {
             "cmd": "draw_circle",
             "args": {
-                "fill": "white",
+                "fill": "text",
                 "r": 200,
                 "tags": ['node'],
-                "outline": "",
+                "outline": "blank",
                 "x": self.x,
                 "y": self.y,
                 "convert_to_m": True,
                 "text":self.id,
-                "text_color":"white",
-                "text_size": 10
+                "text_color":"text",
+                "text_size": "text_size_small"
             }
         }
         if self.is_base:
@@ -198,7 +198,7 @@ class Node:
                         "fill": "grey",
                         "r": 100,
                         "tags": ['node'],
-                        "outline": "",
+                        "outline": "blank",
                         "x": hist[0],
                         "y": hist[1],
                         "convert_to_m": True

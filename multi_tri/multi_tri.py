@@ -174,13 +174,11 @@ class multi_tri(Algorithm):
                     case3 = len(dts) == 1 and dts[0].get_num_guesses() > 1
                     # print(case1, "  ", case2)
                     if case1:  # Resolvable, assign and move on
-                        print("CASE 1")
                         loc = dts[0].get_guesses()[0]
                         node.set_position_vec(loc)
                         self.resolved_nodes.append(node)
                         node.display_triangulations()
                     elif case2:
-                        print("CASE 2")
                         # Step 5.1) Loop through triangulations and generate
                         #           clusters
                         clusters = []
@@ -245,7 +243,6 @@ class multi_tri(Algorithm):
                         if best_cluster is not None and best_cluster.get_radius() <= self.config['max_cluster_radius']:
                             # Resolved!!
                             best_cluster.display()
-                            print(f"R: {best_cluster.get_radius()}")
                             loc = best_cluster.get_center()
                             if self.multi_pipe is not None:
                                 for point in best_cluster.get_points():
@@ -263,7 +260,6 @@ class multi_tri(Algorithm):
                             node.display_triangulations()
 
                     elif case3:
-                        print("CASE 3")
                         # We're gonna have to guess!
                         guessing = True
                         pass
@@ -390,20 +386,21 @@ class multi_tri(Algorithm):
         if bases_resolved is True:
             b1 = self.base_nodes[0].get_position_vec()
             b2 = self.base_nodes[1].get_position_vec()
-            self.multi_pipe.send({
-                "cmd": "connect_points",
-                "args": {
-                    "pos1": (b1.x, b1.y),
-                    "pos2": (b2.x, b2.y),
-                    "text": str(),
-                    "arrow": "both",
-                    "dashed":True,
-                    "color":"#6b92a7",
-                    "text": str(round((self.base_nodes[1].x-self.base_nodes[0].x)/100)/10) + "m",
-                    "text_size": 10,
-                    "text_color": "#6b92a7"
-                }
-            })
+            if self.multi_pipe is not None:
+                self.multi_pipe.send({
+                    "cmd": "connect_points",
+                    "args": {
+                        "pos1": (b1.x, b1.y),
+                        "pos2": (b2.x, b2.y),
+                        "text": str(),
+                        "arrow": "both",
+                        "dashed":True,
+                        "color":"highlight_line",
+                        "text": str(round((self.base_nodes[1].x-self.base_nodes[0].x)/100)/10) + "m",
+                        "text_size": "text_size_small",
+                        "text_color": "highlight_line"
+                    }
+                })
 
         callback(render=True)
 

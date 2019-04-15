@@ -71,8 +71,8 @@ class DirectTriangulation:
                     "y":guess.y,
                     "r":150,
                     "dashed":False,
-                    "outline":"",
-                    "fill":"red"
+                    "outline":"blank",
+                    "fill":"guess"
                 }
             })
 
@@ -88,10 +88,10 @@ class DirectTriangulation:
                 "pos1":resolved_position,
                 "pos2":(self.res1.x, self.res1.y),
                 "dashed":True,
-                "color":"#6b92a7",
+                "color":"highlight_line",
                 "text": str(round(d1)) + "m",
-                "text_size": 10,
-                "text_color": "#6b92a7"
+                "text_size": "text_size_small",
+                "text_color": "highlight_line"
             }
         })
         self.multi_pipe.send({
@@ -100,10 +100,10 @@ class DirectTriangulation:
                 "pos1":resolved_position,
                 "pos2":(self.res2.x, self.res2.y),
                 "dashed":True,
-                "color":"#6b92a7",
+                "color":"highlight_line",
                 "text": str(round(d2)) + "m",
-                "text_size": 10,
-                "text_color": "#6b92a7"
+                "text_size": "text_size_small",
+                "text_color": "highlight_line"
             }
         })
         for guess in self.guess_list:
@@ -113,7 +113,7 @@ class DirectTriangulation:
                     "pos1":(guess.x, guess.y),
                     "pos2":(self.res1.x, self.res1.y),
                     "dashed":True,
-                    "color":"#383c49"
+                    "color":"ghost_line"
                 }
             })
             self.multi_pipe.send({
@@ -122,7 +122,7 @@ class DirectTriangulation:
                     "pos1":(guess.x, guess.y),
                     "pos2":(self.res2.x, self.res2.y),
                     "dashed":True,
-                    "color":"#383c49"
+                    "color":"ghost_line"
                 }
             })
 
@@ -192,8 +192,8 @@ class Cluster:
                     "y": p.y,
                     "r": 100,
                     "dashed": False,
-                    "outline": "",
-                    "fill":"red"
+                    "outline": "blank",
+                    "fill":"guess"
                 }
             }
             if ghost is True:
@@ -207,12 +207,11 @@ class Cluster:
                 "y": self.center.y,
                 "r": self.radius,
                 "dashed": True,
-                "outline": "#383c49",
-                "fill":"",
+                "outline": "ghost_line",
+                "fill":"blank",
                 "width":1
             }
         }
         if ghost is False:
-            main_obj['args']['outline'] = "#375772"
+            main_obj['args']['outline'] = "ghost_line_blue"
         self.multi_pipe.send(main_obj)
-        # canvas.circle_area(self.center.x, self.center.y, self.radius, outline="#375772", text=self.title)
