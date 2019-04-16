@@ -23,6 +23,7 @@ class Node:
         self.is_base = is_base
         self.real_x = x  # random.randint(25, 600)
         self.real_y = y  # random.randint(25, 600)
+        self.guess_radius = -1
         self.resolved = False
         self.extrapolate = False
         self.triangulate_list = []
@@ -77,7 +78,7 @@ class Node:
         self.added_position = False
 
     def add_measurement(self, node_b, dist, std=None):
-        if dist > Node.min_dist and dist < Node.max_dist:
+        if Node.min_dist < dist < Node.max_dist:
             self.measurements.append(Measurement(self, node_b, dist, std=std))
         else:
             print(f"Discarded meas with {dist} distance to node {node_b.id} due to bounding error.")
@@ -109,7 +110,7 @@ class Node:
             x_sum += pos[0]
             y_sum += pos[1]
             counter += 1
-        return (x_sum / counter, y_sum / counter)
+        return x_sum / counter, y_sum / counter
 
     def get_avg_velocity(self):
         hist_vec = []
