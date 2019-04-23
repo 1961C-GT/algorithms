@@ -9,9 +9,9 @@ class Node:
     node_arr = {}
     min_dist = 500  # mm
     max_dist = 1000000  # mm
-    max_history = 10
+    max_history = 1 # 10
     max_move_per_cycle = 5000
-    use_s_last = True
+    use_s_last = False # True
 
     def __init__(self, node_id=None, name=None, is_base=False, x=None, y=None, multi_pipe=None):
         if node_id is None:
